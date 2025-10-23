@@ -10,8 +10,10 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -53,6 +55,7 @@ export default function Dashboard() {
             <Button
               className="w-full mt-4 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
               variant="outline"
+              onClick={() => navigate("/margem")}
             >
               Ver Detalhes
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -111,7 +114,7 @@ export default function Dashboard() {
                   Em análise
                 </p>
               </div>
-              <Button size="sm" variant="ghost" className="text-primary">
+              <Button size="sm" variant="ghost" className="text-primary" onClick={() => navigate("/simulacao/1234")}>
                 Ver
               </Button>
             </div>

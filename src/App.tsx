@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Historico from "./pages/Historico";
 import Notificacoes from "./pages/Notificacoes";
 import Perfil from "./pages/Perfil";
+import DetalhesMargem from "./pages/DetalhesMargem";
+import DetalhesSimulacao from "./pages/DetalhesSimulacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/historico" element={<Historico />} />
           <Route path="/notificacoes" element={<Notificacoes />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/margem" element={<DetalhesMargem />} />
+          <Route path="/simulacao/:id" element={<DetalhesSimulacao />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

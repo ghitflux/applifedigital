@@ -99,6 +99,7 @@ export default function Historico() {
                   size="sm"
                   variant="ghost"
                   className="text-primary hover:bg-primary/10"
+                  onClick={() => window.location.href = `/simulacao/${simulacao.id}`}
                 >
                   Ver Detalhes
                   <ArrowRight className="ml-1 h-4 w-4" />

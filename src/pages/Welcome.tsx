@@ -41,7 +41,7 @@ export default function Welcome() {
           {/* Heading */}
           <div className="text-center space-y-3">
             <h1 className="text-4xl font-bold">
-              Crédito <span className="text-gradient">Simples</span>
+              Life <span className="text-gradient">Digital</span>
             </h1>
             <p className="text-lg text-muted-foreground">
               Simule seu empréstimo consignado e quite suas dívidas com as melhores condições
