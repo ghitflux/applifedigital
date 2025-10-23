@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, TrendingUp } from "lucide-react";
 import { z } from "zod";
+import { PageTransition } from "@/components/animations/PageTransition";
+import { motion } from "framer-motion";
 
 const authSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -112,21 +114,32 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo */}
-          <div className="flex justify-center">
+    <PageTransition variant="scale">
+      <div className="min-h-screen flex flex-col bg-background">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md space-y-8">
+            {/* Logo */}
+            <motion.div
+              className="flex justify-center"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, type: "spring" }}
+            >
             <div className="relative">
               <div className="absolute inset-0 glow rounded-full" />
               <div className="relative w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center">
                 <TrendingUp className="h-10 w-10 text-primary-foreground" />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Title */}
-          <div className="text-center space-y-2">
+          <motion.div
+            className="text-center space-y-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
             <h1 className="text-3xl font-bold">
               {isLogin ? "Bem-vindo de volta" : "Criar conta"}
             </h1>
@@ -135,10 +148,16 @@ export default function Auth() {
                 ? "Entre com sua conta para continuar"
                 : "Crie sua conta para começar"}
             </p>
-          </div>
+          </motion.div>
 
           {/* Form */}
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <motion.form
+            onSubmit={handleEmailAuth}
+            className="space-y-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -171,7 +190,7 @@ export default function Auth() {
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLogin ? "Entrar" : "Criar conta"}
             </Button>
-          </form>
+          </motion.form>
 
           {/* Divider */}
           <div className="relative">
@@ -228,5 +247,6 @@ export default function Auth() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }

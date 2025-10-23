@@ -11,13 +11,21 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "@/components/animations/PageTransition";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="px-6 pt-8 pb-6">
+    <PageTransition variant="fade">
+      <div className="min-h-screen bg-background pb-20">
+        {/* Header */}
+        <motion.header
+          className="px-6 pt-8 pb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
         <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-2xl font-bold">Olá, João!</h1>
@@ -29,12 +37,17 @@ export default function Dashboard() {
             J
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content */}
       <main className="px-6 space-y-6">
         {/* Margem Disponível */}
-        <section className="space-y-4">
+        <motion.section
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
           <h2 className="text-lg font-semibold">Sua Margem</h2>
           <div className="card-gradient rounded-2xl p-6 border border-border/50 glow">
             <div className="flex items-start justify-between mb-4">
@@ -61,37 +74,51 @@ export default function Dashboard() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-        </section>
+        </motion.section>
 
         {/* Quick Actions */}
-        <section className="space-y-4">
+        <motion.section
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
           <h2 className="text-lg font-semibold">Ações Rápidas</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50"
-              onClick={() => navigate("/nova-simulacao")}
-            >
-              <div className="p-3 rounded-xl bg-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <span className="text-sm font-medium">Nova Simulação</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50"
-              onClick={() => navigate("/enviar-documento")}
-            >
-              <div className="p-3 rounded-xl bg-primary/10">
-                <Upload className="h-6 w-6 text-primary" />
-              </div>
-              <span className="text-sm font-medium">Enviar Documento</span>
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50 w-full"
+                onClick={() => navigate("/nova-simulacao")}
+              >
+                <div className="p-3 rounded-xl bg-primary/10">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <span className="text-sm font-medium">Nova Simulação</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50 w-full"
+                onClick={() => navigate("/enviar-documento")}
+              >
+                <div className="p-3 rounded-xl bg-primary/10">
+                  <Upload className="h-6 w-6 text-primary" />
+                </div>
+                <span className="text-sm font-medium">Enviar Documento</span>
+              </Button>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Status Cards */}
-        <section className="space-y-4">
+        <motion.section
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
           <h2 className="text-lg font-semibold">Status Atual</h2>
           <div className="space-y-3">
             <div className="flex items-center gap-4 p-4 rounded-xl bg-card/50 border border-border/50">
@@ -121,10 +148,14 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Info Card */}
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+        >
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
             <div className="flex gap-3">
               <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -138,10 +169,11 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <MobileNav />
     </div>
+    </PageTransition>
   );
 }

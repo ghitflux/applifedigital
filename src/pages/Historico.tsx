@@ -1,6 +1,8 @@
 import { MobileNav } from "@/components/layout/MobileNav";
 import { CheckCircle2, Clock, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageTransition } from "@/components/animations/PageTransition";
+import { motion } from "framer-motion";
 
 const simulacoes = [
   {
@@ -49,68 +51,78 @@ const statusConfig = {
 
 export default function Historico() {
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="px-6 pt-8 pb-6">
-        <h1 className="text-2xl font-bold">Histórico</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Acompanhe suas simulações
-        </p>
-      </header>
+    <PageTransition variant="fade">
+      <div className="min-h-screen bg-background pb-20">
+        {/* Header */}
+        <motion.header
+          className="px-6 pt-8 pb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-2xl font-bold">Histórico</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Acompanhe suas simulações
+          </p>
+        </motion.header>
 
-      {/* Content */}
-      <main className="px-6 space-y-4">
-        {simulacoes.map((simulacao) => {
-          const config = statusConfig[simulacao.status as keyof typeof statusConfig];
-          const StatusIcon = config.icon;
+        {/* Content */}
+        <main className="px-6 space-y-4">
+          {simulacoes.map((simulacao, index) => {
+            const config = statusConfig[simulacao.status as keyof typeof statusConfig];
+            const StatusIcon = config.icon;
 
-          return (
-            <div
-              key={simulacao.id}
-              className="card-gradient rounded-2xl p-5 border border-border/50 hover:border-primary/50 transition-all"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold">{simulacao.tipo}</h3>
-                    <span className="text-xs text-muted-foreground">
-                      #{simulacao.id}
-                    </span>
+            return (
+              <motion.div
+                key={simulacao.id}
+                className="card-gradient rounded-2xl p-5 border border-border/50 hover:border-primary/50 transition-all"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold">{simulacao.tipo}</h3>
+                      <span className="text-xs text-muted-foreground">
+                        #{simulacao.id}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-gradient">
+                      {simulacao.valor}
+                    </p>
                   </div>
-                  <p className="text-2xl font-bold text-gradient">
-                    {simulacao.valor}
-                  </p>
+                  <div className={`p-2 rounded-lg ${config.bgColor}`}>
+                    <StatusIcon className={`h-5 w-5 ${config.color}`} />
+                  </div>
                 </div>
-                <div className={`p-2 rounded-lg ${config.bgColor}`}>
-                  <StatusIcon className={`h-5 w-5 ${config.color}`} />
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className={`text-xs font-medium ${config.color}`}>
-                    {config.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {simulacao.data}
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className={`text-xs font-medium ${config.color}`}>
+                      {config.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {simulacao.data}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-primary hover:bg-primary/10"
+                    onClick={() => window.location.href = `/simulacao/${simulacao.id}`}
+                  >
+                    Ver Detalhes
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-primary hover:bg-primary/10"
-                  onClick={() => window.location.href = `/simulacao/${simulacao.id}`}
-                >
-                  Ver Detalhes
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </main>
+              </motion.div>
+            );
+          })}
+        </main>
 
-      <MobileNav />
-    </div>
+        <MobileNav />
+      </div>
+    </PageTransition>
   );
 }

@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageTransition } from "@/components/animations/PageTransition";
+import { motion } from "framer-motion";
 
 export default function NovaSimulacao() {
   const navigate = useNavigate();
@@ -42,9 +44,14 @@ export default function NovaSimulacao() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="px-6 pt-8 pb-6 border-b border-border">
+    <PageTransition variant="slide">
+      <div className="min-h-screen bg-background pb-20">
+        {/* Header */}
+        <motion.header
+          className="px-6 pt-8 pb-6 border-b border-border"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -61,11 +68,17 @@ export default function NovaSimulacao() {
             </p>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Content */}
       <main className="px-6 pt-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           {/* Tipo de Simulação */}
           <div className="space-y-2">
             <Label htmlFor="tipo">Tipo de Simulação</Label>
@@ -127,16 +140,19 @@ export default function NovaSimulacao() {
           </div>
 
           {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full h-12 bg-gradient-primary hover:opacity-90"
-          >
-            Solicitar Simulação
-          </Button>
-        </form>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              type="submit"
+              className="w-full h-12 bg-gradient-primary hover:opacity-90"
+            >
+              Solicitar Simulação
+            </Button>
+          </motion.div>
+        </motion.form>
       </main>
 
       <MobileNav />
     </div>
+    </PageTransition>
   );
 }
