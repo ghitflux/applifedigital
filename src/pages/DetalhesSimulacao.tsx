@@ -65,47 +65,62 @@ export default function DetalhesSimulacao() {
 
       {/* Content */}
       <main className="px-6 pt-6 space-y-4">
-        {/* Atribuído a */}
-        <div className="card-gradient rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-2 text-sm">
-            <User className="h-4 w-4 text-primary" />
-            <span className="text-muted-foreground">Atribuído a:</span>
-            <span className="font-semibold">{simulacao.atribuidoA}</span>
-          </div>
+        {/* Valor Pré-Liberado - Destaque no topo */}
+        <div className="rounded-2xl p-6 border-2 border-success/50 bg-success/10">
+          <p className="text-sm font-medium text-success/80 mb-2">
+            Valor Pré-Liberado para Você!
+          </p>
+          <p className="text-4xl font-bold text-success">
+            {simulacao.liberadoCliente}
+          </p>
+        </div>
+
+        {/* Actions - Botões no topo */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 h-12 border-destructive/30 text-destructive hover:bg-destructive/10"
+          >
+            <XCircle className="mr-2 h-5 w-5" />
+            Reprovar
+          </Button>
+          <Button className="flex-1 h-12 bg-success hover:bg-success/90">
+            <CheckCircle2 className="mr-2 h-5 w-5" />
+            Aprovar e Enviar
+          </Button>
         </div>
 
         {/* Bancos Incluídos */}
-        <div className="card-gradient rounded-xl p-5 border border-border/50">
-          <h3 className="text-sm font-semibold mb-3">Bancos Incluídos:</h3>
+        <div className="card-gradient rounded-xl p-4 border border-border/50">
+          <h3 className="text-base font-semibold mb-3">Bancos Incluídos</h3>
           <div className="flex gap-2 mb-3">
             {simulacao.bancosIncluidos.map((banco) => (
               <div
                 key={banco}
-                className="px-3 py-1.5 rounded-lg bg-primary/20 border border-primary/30"
+                className="px-3 py-2 rounded-lg bg-primary/20 border border-primary/30"
               >
-                <span className="text-xs font-semibold text-primary">
+                <span className="text-sm font-semibold text-primary">
                   {banco}
                 </span>
               </div>
             ))}
           </div>
-          <div className="flex gap-4 text-xs text-muted-foreground">
+          <div className="flex gap-4 text-sm text-muted-foreground">
             <span>Prazo: {simulacao.prazo}</span>
             <span>% Consultoria: {simulacao.consultoria}</span>
           </div>
         </div>
 
         {/* Totais dos Bancos */}
-        <div className="card-gradient rounded-xl p-5 border border-border/50">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <span className="text-primary">📊</span>
-            Totais dos Bancos
+        <div className="card-gradient rounded-xl p-4 border border-border/50">
+          <h3 className="text-base font-semibold mb-4">
+            📊 Totais dos Bancos
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {Object.entries(simulacao.totaisBancos).map(([key, value]) => (
               <div
                 key={key}
-                className="flex items-center justify-between py-2"
+                className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
               >
                 <span className="text-sm text-muted-foreground">
                   {key === "valorParcelaTotal" && "Valor Parcela Total"}
@@ -113,47 +128,33 @@ export default function DetalhesSimulacao() {
                   {key === "valorLiberadoTotal" && "Valor Liberado Total"}
                   {key === "seguroObrigatorioBanco" && "Seguro Obrigatório Banco"}
                 </span>
-                <span className="text-sm font-bold">{value}</span>
+                <span className="text-base font-bold">{value}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Cálculos Financeiros */}
-        <div className="card-gradient rounded-xl p-5 border border-border/50">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <span className="text-primary">💰</span>
-            Cálculos Financeiros
+        <div className="card-gradient rounded-xl p-4 border border-border/50">
+          <h3 className="text-base font-semibold mb-4">
+            💰 Cálculos Financeiros
           </h3>
-          <div className="space-y-3">
-            {Object.entries(simulacao.calculosFinanceiros).map(([key, value]) => (
-              <div
-                key={key}
-                className="flex items-center justify-between py-2"
-              >
-                <span className="text-sm text-muted-foreground">
-                  {key === "valorTotalFinanciado" && "Valor Total Financiado"}
-                  {key === "valorLiquido" && "Valor Líquido"}
-                  {key === "custoConsultoria" && "Custo Consultoria"}
-                  {key === "custoConsultoriaLiquido" &&
-                    `Custo Consultoria Líquido (${simulacao.calculosFinanceiros.consultoriaPercentual})`}
-                </span>
-                <span className="text-sm font-bold">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Liberado para o Cliente */}
-        <div className="rounded-xl p-5 border-2 border-success/50 bg-success/10">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-success flex items-center gap-2">
-              <span>💳</span>
-              Liberado para o Cliente
-            </span>
-            <span className="text-2xl font-bold text-success">
-              {simulacao.liberadoCliente}
-            </span>
+          <div className="space-y-2.5">
+            {Object.entries(simulacao.calculosFinanceiros)
+              .filter(([key]) => key !== "custoConsultoriaLiquido" && key !== "consultoriaPercentual")
+              .map(([key, value]) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
+                >
+                  <span className="text-sm text-muted-foreground">
+                    {key === "valorTotalFinanciado" && "Valor Total Financiado"}
+                    {key === "valorLiquido" && "Valor Líquido"}
+                    {key === "custoConsultoria" && "Custo Consultoria"}
+                  </span>
+                  <span className="text-base font-bold">{value}</span>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -164,21 +165,6 @@ export default function DetalhesSimulacao() {
             Valor Líquido = Liberado - Seguro | Custo = Total × % | Cliente =
             Líquido - Custo
           </p>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            variant="outline"
-            className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
-          >
-            <XCircle className="mr-2 h-4 w-4" />
-            Reprovar
-          </Button>
-          <Button className="flex-1 bg-success hover:bg-success/90">
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-            Aprovar e Enviar
-          </Button>
         </div>
       </main>
 
