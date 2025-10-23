@@ -70,6 +70,7 @@ export default function Dashboard() {
             <Button
               variant="outline"
               className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50"
+              onClick={() => navigate("/nova-simulacao")}
             >
               <div className="p-3 rounded-xl bg-primary/10">
                 <FileText className="h-6 w-6 text-primary" />
@@ -79,6 +80,7 @@ export default function Dashboard() {
             <Button
               variant="outline"
               className="h-32 flex flex-col items-center justify-center gap-3 bg-card/50 border-border/50 hover:border-primary/50"
+              onClick={() => navigate("/enviar-documento")}
             >
               <div className="p-3 rounded-xl bg-primary/10">
                 <Upload className="h-6 w-6 text-primary" />

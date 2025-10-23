@@ -73,9 +73,8 @@ export default function Welcome() {
 
           {/* CTA Button */}
           <Button
-            size="lg"
             className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-primary hover:opacity-90 transition-opacity"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/auth")}
           >
             Começar Agora
             <ArrowRight className="ml-2 h-5 w-5" />

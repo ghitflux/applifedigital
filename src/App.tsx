@@ -10,6 +10,13 @@ import Notificacoes from "./pages/Notificacoes";
 import Perfil from "./pages/Perfil";
 import DetalhesMargem from "./pages/DetalhesMargem";
 import DetalhesSimulacao from "./pages/DetalhesSimulacao";
+import Auth from "./pages/Auth";
+import NovaSimulacao from "./pages/NovaSimulacao";
+import EnviarDocumento from "./pages/EnviarDocumento";
+import DadosPessoais from "./pages/DadosPessoais";
+import MeusDocumentos from "./pages/MeusDocumentos";
+import SegurancaPrivacidade from "./pages/SegurancaPrivacidade";
+import AjudaSuporte from "./pages/AjudaSuporte";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,12 +29,19 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Welcome />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/historico" element={<Historico />} />
           <Route path="/notificacoes" element={<Notificacoes />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/margem" element={<DetalhesMargem />} />
           <Route path="/simulacao/:id" element={<DetalhesSimulacao />} />
+          <Route path="/nova-simulacao" element={<NovaSimulacao />} />
+          <Route path="/enviar-documento" element={<EnviarDocumento />} />
+          <Route path="/dados-pessoais" element={<DadosPessoais />} />
+          <Route path="/meus-documentos" element={<MeusDocumentos />} />
+          <Route path="/seguranca-privacidade" element={<SegurancaPrivacidade />} />
+          <Route path="/ajuda-suporte" element={<AjudaSuporte />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
