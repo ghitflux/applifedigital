@@ -20,6 +20,23 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: applife_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://applife:applife_password@postgres:5432/applife_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: applife_pgadmin
