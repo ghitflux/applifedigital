@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Alert, View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Button, Input, Loading, Card } from '@/components';
+import { Button, Input, Loading, Card, Header, MobileNav } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@/utils/formatters';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/constants/theme';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 export default function ConsultarMargem() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
   const [marginData, setMarginData] = useState<any>(null);
@@ -20,7 +21,6 @@ export default function ConsultarMargem() {
     }
 
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setMarginData({
         totalMargin: 15000,
@@ -38,18 +38,18 @@ export default function ConsultarMargem() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Consultar Margem" showBackButton />
       <View style={styles.content}>
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.headerTitle}>Consultar Margem</Text>
-        </View>
-
-        <ScrollView style={styles.scrollView}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+        >
           {!marginData ? (
             <View style={styles.section}>
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.primary + '1A' }]}>
                 <Ionicons name="information-circle-outline" size={24} color={colors.primary} />
-                <Text style={styles.infoText}>
+                <Text style={[styles.infoText, { color: colors.text }]}>
                   Consulte sua margem consignável disponível
                 </Text>
               </View>
@@ -69,44 +69,44 @@ export default function ConsultarMargem() {
           ) : (
             <>
               <Card style={styles.successCard}>
-                <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
-                <Text style={styles.successText}>Consulta Realizada!</Text>
+                <Ionicons name="checkmark-circle" size={48} color={colors.success} />
+                <Text style={[styles.successText, { color: colors.text }]}>Consulta Realizada!</Text>
               </Card>
 
               <Card style={styles.marginCard}>
                 <View style={styles.marginItem}>
-                  <Text style={styles.label}>Margem Total</Text>
-                  <Text style={styles.value}>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>Margem Total</Text>
+                  <Text style={[styles.value, { color: colors.text }]}>
                     {formatCurrency(marginData.totalMargin)}
                   </Text>
                 </View>
 
                 <View style={styles.marginItem}>
-                  <Text style={styles.label}>Margem Utilizada</Text>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>Margem Utilizada</Text>
                   <Text style={[styles.value, { color: colors.error }]}>
                     {formatCurrency(marginData.usedMargin)}
                   </Text>
                 </View>
 
-                <View style={styles.separator} />
+                <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
                 <View style={styles.marginItem}>
-                  <Text style={styles.labelBold}>Margem Disponível</Text>
-                  <Text style={styles.valueLarge}>
+                  <Text style={[styles.labelBold, { color: colors.text }]}>Margem Disponível</Text>
+                  <Text style={[styles.valueLarge, { color: colors.success }]}>
                     {formatCurrency(marginData.availableMargin)}
                   </Text>
                 </View>
 
-                <View style={styles.separator} />
+                <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
                 <View style={styles.marginItem}>
-                  <Text style={styles.label}>Empregador</Text>
-                  <Text style={styles.valueText}>{marginData.employer}</Text>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>Empregador</Text>
+                  <Text style={[styles.valueText, { color: colors.text }]}>{marginData.employer}</Text>
                 </View>
 
                 <View style={styles.marginItem}>
-                  <Text style={styles.label}>Tipo de Vínculo</Text>
-                  <Text style={styles.valueText}>{marginData.employmentType}</Text>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>Tipo de Vínculo</Text>
+                  <Text style={[styles.valueText, { color: colors.text }]}>{marginData.employmentType}</Text>
                 </View>
               </Card>
 
@@ -121,6 +121,8 @@ export default function ConsultarMargem() {
           )}
         </ScrollView>
       </View>
+      
+      <MobileNav />
     </SafeAreaView>
   );
 }
@@ -128,91 +130,70 @@ export default function ConsultarMargem() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
-  },
-  header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.text,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    padding: 20,
+    padding: spacing.lg,
   },
   infoCard: {
-    backgroundColor: `${colors.primary}1A`,
-    padding: 16,
-    borderRadius: 12,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
     alignItems: 'center',
   },
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
   },
   successCard: {
-    margin: 20,
-    padding: 32,
+    margin: spacing.lg,
+    padding: spacing.xl,
     alignItems: 'center',
   },
   successText: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text,
-    marginTop: 12,
+    marginTop: spacing.sm,
   },
   marginCard: {
-    marginHorizontal: 20,
+    marginHorizontal: spacing.lg,
   },
   marginItem: {
-    paddingVertical: 12,
+    paddingVertical: spacing.sm,
   },
   label: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginBottom: 4,
   },
   labelBold: {
     fontSize: 16,
-    color: colors.text,
     fontWeight: '700',
     marginBottom: 4,
   },
   value: {
     fontSize: 18,
-    color: colors.text,
     fontWeight: '500',
   },
   valueLarge: {
     fontSize: 24,
-    color: colors.success,
     fontWeight: '700',
   },
   valueText: {
     fontSize: 16,
-    color: colors.text,
     fontWeight: '500',
   },
   separator: {
     height: 1,
-    backgroundColor: colors.border,
-    marginVertical: 8,
+    marginVertical: spacing.sm,
   },
   buttonContainer: {
-    padding: 20,
+    padding: spacing.lg,
   },
 });
-

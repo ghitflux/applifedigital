@@ -1,11 +1,13 @@
 import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { colors, typography, borderRadius } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
+import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -15,20 +17,20 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.iconContainer}>
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.card, borderColor: colors.accent }]}>
           <Ionicons name="trending-up" size={32} color={colors.accent} />
         </View>
       </View>
       
-      <Text style={styles.title}>Bem-vindo de volta</Text>
-      <Text style={styles.subtitle}>Entre com sua conta para continuar</Text>
+      <Text style={[styles.title, { color: colors.text }]}>Bem-vindo de volta</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Entre com sua conta para continuar</Text>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Email</Text>
+        <Text style={[styles.label, { color: colors.text }]}>Email</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="seu@email.com"
           placeholderTextColor={colors.placeholder}
           value={email}
@@ -37,9 +39,9 @@ export default function Login() {
           autoCapitalize="none"
         />
 
-        <Text style={styles.label}>Senha</Text>
+        <Text style={[styles.label, { color: colors.text }]}>Senha</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="••••••••"
           placeholderTextColor={colors.placeholder}
           value={password}
@@ -47,23 +49,23 @@ export default function Login() {
           secureTextEntry
         />
 
-        <Pressable style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <Pressable style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleLogin}>
+          <Text style={[styles.buttonText, { color: colors.text }]}>Entrar</Text>
         </Pressable>
 
         <View style={styles.separator}>
-          <View style={styles.separatorLine} />
-          <Text style={styles.separatorText}>OU CONTINUE COM</Text>
-          <View style={styles.separatorLine} />
+          <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
+          <Text style={[styles.separatorText, { color: colors.textSecondary }]}>OU CONTINUE COM</Text>
+          <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
         </View>
 
-        <Pressable style={styles.googleButton}>
+        <Pressable style={[styles.googleButton, { backgroundColor: colors.card }]}>
           <Ionicons name="logo-google" size={20} color={colors.text} />
-          <Text style={styles.googleButtonText}>Continuar com Google</Text>
+          <Text style={[styles.googleButtonText, { color: colors.text }]}>Continuar com Google</Text>
         </Pressable>
 
         <Pressable onPress={() => router.push('/(auth)/register')}>
-          <Text style={styles.link}>Não tem conta? Criar conta</Text>
+          <Text style={[styles.link, { color: colors.accent }]}>Não tem conta? Criar conta</Text>
         </Pressable>
       </View>
     </View>
@@ -72,98 +74,82 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: colors.background,
+    padding: spacing.lg,
     justifyContent: 'center',
   },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   iconCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.card,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: colors.accent,
   },
   title: {
     fontSize: 32,
     fontWeight: '700',
-    marginBottom: 8,
-    color: colors.text,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 32,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
   form: {
-    gap: 16,
+    gap: spacing.md,
   },
   label: {
     fontSize: 14,
-    color: colors.text,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: borderRadius.md,
-    padding: 16,
+    padding: spacing.md,
     fontSize: 16,
-    backgroundColor: colors.card,
-    color: colors.text,
   },
   button: {
-    backgroundColor: colors.primary,
-    padding: 16,
+    padding: spacing.md,
     borderRadius: borderRadius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   buttonText: {
-    color: colors.text,
     fontSize: 16,
   },
   separator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
+    marginVertical: spacing.lg,
   },
   separatorLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.border,
   },
   separatorText: {
     fontSize: 12,
-    color: colors.textSecondary,
-    marginHorizontal: 16,
+    marginHorizontal: spacing.md,
     textTransform: 'uppercase',
   },
   googleButton: {
-    backgroundColor: colors.card,
-    padding: 16,
+    padding: spacing.md,
     borderRadius: borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   googleButtonText: {
-    color: colors.text,
     fontSize: 16,
   },
   link: {
-    color: colors.accent,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
     fontSize: 14,
   },
 });

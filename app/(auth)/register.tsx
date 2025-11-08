@@ -1,9 +1,12 @@
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 export default function Register() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,21 +18,23 @@ export default function Register() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Criar Conta</Text>
-      <Text style={styles.subtitle}>Preencha seus dados para começar</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+      <Text style={[styles.title, { color: colors.text }]}>Criar Conta</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Preencha seus dados para começar</Text>
 
       <View style={styles.form}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="Nome completo"
+          placeholderTextColor={colors.placeholder}
           value={name}
           onChangeText={setName}
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="Email"
+          placeholderTextColor={colors.placeholder}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -37,27 +42,29 @@ export default function Register() {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="Senha"
+          placeholderTextColor={colors.placeholder}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
           placeholder="Confirmar senha"
+          placeholderTextColor={colors.placeholder}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
 
-        <Pressable style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Criar Conta</Text>
+        <Pressable style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleRegister}>
+          <Text style={[styles.buttonText, { color: colors.text }]}>Criar Conta</Text>
         </Pressable>
 
         <Pressable onPress={() => router.back()}>
-          <Text style={styles.link}>Já tem conta? Entrar</Text>
+          <Text style={[styles.link, { color: colors.accent }]}>Já tem conta? Entrar</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -66,50 +73,43 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
-    padding: 20,
+    padding: spacing.lg,
     justifyContent: 'center',
     minHeight: '100%',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#1a1a1a',
+    marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   form: {
-    gap: 16,
+    gap: spacing.md,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   link: {
-    color: '#007AFF',
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 });
 

@@ -1,6 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Header, MobileNav } from '@/components';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 interface Document {
   id: string;
@@ -10,106 +14,93 @@ interface Document {
 
 export default function MeusDocumentos() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const documents: Document[] = [];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Meus Documentos</Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Meus Documentos" showBackButton />
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
         <Pressable
-          style={styles.uploadButton}
+          style={[styles.uploadButton, { backgroundColor: colors.card }]}
           onPress={() => router.push('/screens/enviar-documento')}
         >
-          <Ionicons name="cloud-upload" size={32} color="#007AFF" />
-          <Text style={styles.uploadText}>Enviar Novo Documento</Text>
+          <Ionicons name="cloud-upload" size={32} color={colors.accent} />
+          <Text style={[styles.uploadText, { color: colors.accent }]}>Enviar Novo Documento</Text>
         </Pressable>
 
         {documents.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="document-text-outline" size={64} color="#8E8E93" />
-            <Text style={styles.emptyText}>Nenhum documento enviado</Text>
-            <Text style={styles.emptySubtext}>
+            <Ionicons name="document-text-outline" size={64} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.text }]}>Nenhum documento enviado</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
               Envie seus documentos para agilizar o processo
             </Text>
           </View>
         ) : (
           documents.map((doc) => (
-            <View key={doc.id} style={styles.documentCard}>
-              <Ionicons name="document" size={24} color="#007AFF" />
+            <View key={doc.id} style={[styles.documentCard, { backgroundColor: colors.card }]}>
+              <Ionicons name="document" size={24} color={colors.accent} />
               <View style={styles.documentInfo}>
-                <Text style={styles.documentName}>{doc.name}</Text>
-                <Text style={styles.documentStatus}>{doc.status}</Text>
+                <Text style={[styles.documentName, { color: colors.text }]}>{doc.name}</Text>
+                <Text style={[styles.documentStatus, { color: colors.textSecondary }]}>{doc.status}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
             </View>
           ))
         )}
       </ScrollView>
-    </View>
+      
+      <MobileNav />
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   content: {
     flex: 1,
   },
   uploadButton: {
-    backgroundColor: '#fff',
-    margin: 20,
-    padding: 24,
-    borderRadius: 16,
+    margin: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   uploadText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#007AFF',
   },
   emptyState: {
     alignItems: 'center',
-    padding: 40,
+    padding: spacing.xl,
   },
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginTop: 16,
+    marginTop: spacing.md,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 8,
+    marginTop: spacing.sm,
     textAlign: 'center',
   },
   documentCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    padding: 16,
-    borderRadius: 12,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   documentInfo: {
     flex: 1,
@@ -117,12 +108,9 @@ const styles = StyleSheet.create({
   documentName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
   },
   documentStatus: {
     fontSize: 14,
-    color: '#666',
     marginTop: 2,
   },
 });
-

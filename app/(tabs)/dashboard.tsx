@@ -1,22 +1,18 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, borderRadius, spacing } from '@/constants/theme';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/contexts/ThemeContext';
+import { typography, borderRadius, spacing } from '@/constants/theme';
+import { Header, MobileNav } from '@/components';
 
 export default function Dashboard() {
   const router = useRouter();
-
-  const handleNotifications = () => {
-    router.push('/(tabs)/notificacoes');
-  };
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   const handleConsultarMargem = () => {
     router.push('/screens/consultar-margem');
-  };
-
-  const handleNovaSimulacao = () => {
-    router.push('/screens/nova-simulacao');
   };
 
   const handleEnviarDocumento = () => {
@@ -32,80 +28,76 @@ export default function Dashboard() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scrollView}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Olá, João!</Text>
-          <Text style={styles.name}>Bem-vindo de volta</Text>
-        </View>
-        <Pressable onPress={handleNotifications}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>J</Text>
-          </View>
-        </Pressable>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header />
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sua Margem</Text>
-        <View style={styles.marginCard}>
-          <Text style={styles.marginLabel}>Margem Disponível</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Sua Margem</Text>
+        <View style={[styles.marginCard, { backgroundColor: colors.card }]}>
+          <Text style={[styles.marginLabel, { color: colors.textSecondary }]}>Margem Disponível</Text>
           <View style={styles.marginValueContainer}>
-            <Text style={styles.marginValue}>R$ 5.240,00</Text>
-            <View style={styles.dollarIcon}>
+            <Text style={[styles.marginValue, { color: colors.accent }]}>R$ 5.240,00</Text>
+            <View style={[styles.dollarIcon, { backgroundColor: colors.success + '20' }]}>
               <Ionicons name="logo-usd" size={24} color={colors.success} />
             </View>
           </View>
           <View style={styles.marginStatus}>
             <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-            <Text style={styles.marginStatusText}>Atualizado há 2 horas</Text>
+            <Text style={[styles.marginStatusText, { color: colors.textSecondary }]}>Atualizado há 2 horas</Text>
           </View>
-          <Pressable style={styles.detailsButton} onPress={handleConsultarMargem}>
-            <Text style={styles.detailsButtonText}>Ver Detalhes</Text>
+          <Pressable style={[styles.detailsButton, { backgroundColor: colors.cardSecondary }]} onPress={handleConsultarMargem}>
+            <Text style={[styles.detailsButtonText, { color: colors.accent }]}>Ver Detalhes</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.accent} />
           </Pressable>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ações Rápidas</Text>
-
-        <View style={styles.actionsGrid}>
-          <Pressable style={styles.actionCard} onPress={handleNovaSimulacao}>
-            <Ionicons name="document-text-outline" size={32} color={colors.accent} />
-            <Text style={styles.actionText}>Nova Simulação</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionCard} onPress={handleEnviarDocumento}>
-            <Ionicons name="cloud-upload-outline" size={32} color={colors.accent} />
-            <Text style={styles.actionText}>Enviar Documento</Text>
-          </Pressable>
-        </View>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Ações Rápidas</Text>
+        <Pressable style={[styles.actionCardFull, { backgroundColor: colors.card }]} onPress={handleEnviarDocumento}>
+          <View style={[styles.actionIconContainer, { backgroundColor: colors.accent + '15' }]}>
+            <Ionicons name="cloud-upload-outline" size={28} color={colors.accent} />
+          </View>
+          <View style={styles.actionContent}>
+            <Text style={[styles.actionText, { color: colors.text }]}>Enviar Documento</Text>
+            <Text style={[styles.actionSubtext, { color: colors.textSecondary }]}>Envie seus documentos para análise</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </Pressable>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Status Atual</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Status Atual</Text>
         
-        <View style={styles.statusCard}>
+        <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
           <Ionicons name="checkmark-circle" size={24} color={colors.success} />
           <View style={styles.statusContent}>
-            <Text style={styles.statusTitle}>Documentos</Text>
-            <Text style={styles.statusSubtitle}>Todos verificados</Text>
+            <Text style={[styles.statusTitle, { color: colors.text }]}>Documentos</Text>
+            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Todos verificados</Text>
           </View>
         </View>
 
-        <View style={styles.statusCard}>
+        <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
           <Ionicons name="time-outline" size={24} color={colors.warning} />
           <View style={styles.statusContent}>
-            <Text style={styles.statusTitle}>Simulação #1234</Text>
-            <Text style={styles.statusSubtitle}>Em análise</Text>
+            <Text style={[styles.statusTitle, { color: colors.text }]}>Simulação #1234</Text>
+            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Em análise</Text>
           </View>
-          <Pressable>
-            <Text style={styles.statusLink}>Ver</Text>
+          <Pressable onPress={() => router.push({
+            pathname: '/screens/detalhes-simulacao',
+            params: { id: '1234' }
+          })}>
+            <Text style={[styles.statusLink, { color: colors.accent }]}>Ver</Text>
           </Pressable>
         </View>
       </View>
       </ScrollView>
+      
+      <MobileNav />
     </SafeAreaView>
   );
 }
@@ -113,55 +105,30 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.md,
-    paddingTop: spacing.md,
-  },
-  greeting: {
-    fontSize: 24,
-    color: colors.text,
-  },
-  name: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 18,
-    color: colors.text,
-  },
   section: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
   },
   sectionTitle: {
     fontSize: 20,
-    color: colors.text,
+    fontWeight: '600',
     marginBottom: spacing.md,
   },
   marginCard: {
-    backgroundColor: colors.card,
     padding: spacing.lg,
     borderRadius: borderRadius.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   marginLabel: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginBottom: spacing.sm,
   },
   marginValueContainer: {
@@ -172,13 +139,11 @@ const styles = StyleSheet.create({
   },
   marginValue: {
     fontSize: 36,
-    color: colors.accent,
   },
   dollarIcon: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: colors.success + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -190,63 +155,73 @@ const styles = StyleSheet.create({
   },
   marginStatusText: {
     fontSize: 12,
-    color: colors.textSecondary,
   },
   detailsButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.cardSecondary,
     padding: spacing.sm,
     borderRadius: borderRadius.sm,
     gap: 8,
   },
   detailsButtonText: {
     fontSize: 14,
-    color: colors.accent,
   },
-  actionsGrid: {
+  actionCardFull: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  actionCard: {
-    backgroundColor: colors.card,
+    alignItems: 'center',
     padding: spacing.lg,
     borderRadius: borderRadius.md,
+    gap: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '48%',
-    gap: spacing.sm,
+  },
+  actionContent: {
+    flex: 1,
   },
   actionText: {
-    fontSize: 14,
-    color: colors.text,
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  actionSubtext: {
+    fontSize: 12,
   },
   statusCard: {
-    backgroundColor: colors.card,
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.sm,
     gap: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   statusContent: {
     flex: 1,
   },
   statusTitle: {
     fontSize: 16,
-    color: colors.text,
     marginBottom: 4,
   },
   statusSubtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
   },
   statusLink: {
     fontSize: 14,
-    color: colors.accent,
   },
 });
 

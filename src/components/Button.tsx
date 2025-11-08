@@ -1,4 +1,6 @@
 import { Pressable, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 interface ButtonProps {
   title: string;
@@ -19,23 +21,25 @@ export default function Button({
   style,
   textStyle,
 }: ButtonProps) {
+  const { colors } = useTheme();
+
   const getButtonStyle = () => {
     switch (variant) {
       case 'secondary':
-        return styles.secondaryButton;
+        return { backgroundColor: colors.secondary };
       case 'outline':
-        return styles.outlineButton;
+        return { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.accent };
       default:
-        return styles.primaryButton;
+        return { backgroundColor: colors.accent };
     }
   };
 
   const getTextStyle = () => {
     switch (variant) {
       case 'outline':
-        return styles.outlineText;
+        return { color: colors.accent };
       default:
-        return styles.buttonText;
+        return { color: colors.text };
     }
   };
 
@@ -52,31 +56,20 @@ export default function Button({
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? '#007AFF' : '#fff'} />
+        <ActivityIndicator color={variant === 'outline' ? colors.accent : colors.text} />
       ) : (
-        <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+        <Text style={[styles.buttonText, getTextStyle(), textStyle]}>{title}</Text>
       )}
     </Pressable>
   );
 }
 const styles = StyleSheet.create({
   button: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#007AFF',
-  },
-  secondaryButton: {
-    backgroundColor: '#5856D6',
-  },
-  outlineButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#007AFF',
   },
   disabled: {
     opacity: 0.5,
@@ -85,12 +78,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  outlineText: {
-    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },

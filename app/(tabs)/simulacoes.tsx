@@ -1,72 +1,73 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, borderRadius, spacing } from '@/constants/theme';
+import { useRouter } from 'expo-router';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/contexts/ThemeContext';
+import { typography, borderRadius, spacing } from '@/constants/theme';
+import { Header, MobileNav } from '@/components';
 
 export default function Simulacoes() {
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Simulações</Text>
-      </View>
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
-      <ScrollView style={styles.content}>
-        <Pressable style={styles.newSimulation}>
+  const handleBack = () => {
+    router.push('/(tabs)/dashboard');
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Simulações" showBackButton onBackPress={handleBack} />
+
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
+        <Pressable style={[styles.newSimulation, { backgroundColor: colors.card, borderColor: colors.accent }]}>
           <Ionicons name="add-circle" size={48} color={colors.accent} />
-          <Text style={styles.newSimulationText}>Nova Simulação</Text>
-          <Text style={styles.newSimulationSubtext}>
+          <Text style={[styles.newSimulationText, { color: colors.accent }]}>Nova Simulação</Text>
+          <Text style={[styles.newSimulationSubtext, { color: colors.textSecondary }]}>
             Simule um empréstimo consignável
           </Text>
         </Pressable>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Simulações Salvas</Text>
-          <View style={styles.emptyState}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Simulações Salvas</Text>
+          <View style={[styles.emptyState, { backgroundColor: colors.card }]}>
             <Ionicons name="document-outline" size={48} color={colors.textTertiary} />
-            <Text style={styles.emptyText}>Nenhuma simulação salva</Text>
-            <Text style={styles.emptySubtext}>
+            <Text style={[styles.emptyText, { color: colors.text }]}>Nenhuma simulação salva</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
               Suas simulações aparecerão aqui
             </Text>
           </View>
         </View>
       </ScrollView>
+      
+      <MobileNav />
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: spacing.md,
-    paddingTop: spacing.md,
-  },
-  title: {
-    fontSize: 32,
-    color: colors.text,
   },
   content: {
     flex: 1,
   },
   newSimulation: {
-    backgroundColor: colors.card,
     margin: spacing.md,
     padding: spacing.xl,
     borderRadius: borderRadius.lg,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: colors.accent,
     borderStyle: 'dashed',
   },
   newSimulationText: {
     fontSize: 20,
-    color: colors.accent,
     marginTop: spacing.sm,
   },
   newSimulationSubtext: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginTop: 4,
   },
   section: {
@@ -74,24 +75,19 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    color: colors.text,
     marginBottom: spacing.md,
   },
   emptyState: {
-    backgroundColor: colors.card,
     padding: spacing.xl,
     borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   emptyText: {
     fontSize: 16,
-    color: colors.text,
     marginTop: spacing.sm,
   },
   emptySubtext: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginTop: 4,
   },
 });
-

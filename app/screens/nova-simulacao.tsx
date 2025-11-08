@@ -1,10 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Input, Button } from '@/components';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Input, Button, Header, MobileNav } from '@/components';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 export default function NovaSimulacao() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [amount, setAmount] = useState('');
   const [installments, setInstallments] = useState('');
   const [interestRate] = useState('2.5'); // Fixed rate for now
@@ -40,14 +45,15 @@ export default function NovaSimulacao() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Nova Simulação</Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Nova Simulação" showBackButton />
 
-      <ScrollView style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Dados da Simulação</Text>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Dados da Simulação</Text>
 
           <Input
             label="Valor Desejado (R$)"
@@ -71,7 +77,7 @@ export default function NovaSimulacao() {
             editable={false}
           />
 
-          <Text style={styles.info}>
+          <Text style={[styles.info, { color: colors.textSecondary }]}>
             * Taxa de juros fixa mensal
           </Text>
         </View>
@@ -80,48 +86,34 @@ export default function NovaSimulacao() {
           <Button title="Simular" onPress={handleSimulate} />
         </View>
       </ScrollView>
-    </View>
+      
+      <MobileNav />
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   content: {
     flex: 1,
   },
   card: {
-    backgroundColor: '#fff',
-    margin: 20,
-    padding: 20,
-    borderRadius: 16,
+    margin: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
   },
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   info: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   buttonContainer: {
-    padding: 20,
+    padding: spacing.lg,
   },
 });
 

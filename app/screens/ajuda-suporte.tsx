@@ -1,13 +1,43 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Header, MobileNav, Accordion } from '@/components';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 export default function AjudaSuporte() {
-  const handleWhatsApp = () => {
-    Linking.openURL('https://wa.me/5511999999999');
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+
+  const faqs = [
+    {
+      pergunta: 'Como solicitar uma simulação?',
+      resposta:
+        'Vá até a página inicial e clique em "Nova Simulação". Preencha os dados solicitados e aguarde a análise.',
+    },
+    {
+      pergunta: 'Quanto tempo leva para receber o resultado?',
+      resposta:
+        'A análise leva em média de 2 a 4 horas úteis. Você será notificado assim que o resultado estiver disponível.',
+    },
+    {
+      pergunta: 'Quais documentos são necessários?',
+      resposta:
+        'Você precisará enviar seu contracheque recente (últimos 3 meses) e documento de identidade.',
+    },
+    {
+      pergunta: 'A simulação afeta meu score de crédito?',
+      resposta:
+        'Não, a simulação não impacta seu score de crédito. É apenas uma análise preliminar.',
+    },
+  ];
+
+  const handleChat = () => {
+    console.log('Abrir chat online');
   };
 
   const handleEmail = () => {
-    Linking.openURL('mailto:suporte@applifedigital.com');
+    Linking.openURL('mailto:suporte@lifedigital.com.br');
   };
 
   const handlePhone = () => {
@@ -15,139 +45,114 @@ export default function AjudaSuporte() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Ajuda e Suporte</Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Ajuda e Suporte" showBackButton />
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
+        {/* Canais de Contato */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Entre em Contato</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Entre em Contato</Text>
 
-          <Pressable style={styles.contactCard} onPress={handleWhatsApp}>
-            <Ionicons name="logo-whatsapp" size={32} color="#25D366" />
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>WhatsApp</Text>
-              <Text style={styles.contactText}>(11) 99999-9999</Text>
+          <Pressable style={[styles.contactCard, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={handleChat}>
+            <View style={[styles.iconWrapper, { backgroundColor: colors.accent + '20' }]}>
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color={colors.accent} />
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <View style={styles.contactInfo}>
+              <Text style={[styles.contactLabel, { color: colors.text }]}>Chat Online</Text>
+              <Text style={[styles.contactSubtext, { color: colors.textSecondary }]}>Atendimento imediato</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </Pressable>
 
-          <Pressable style={styles.contactCard} onPress={handleEmail}>
-            <Ionicons name="mail" size={32} color="#007AFF" />
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>Email</Text>
-              <Text style={styles.contactText}>suporte@applifedigital.com</Text>
+          <Pressable style={[styles.contactCard, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={handleEmail}>
+            <View style={[styles.iconWrapper, { backgroundColor: colors.accent + '20' }]}>
+              <Ionicons name="mail-outline" size={24} color={colors.accent} />
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <View style={styles.contactInfo}>
+              <Text style={[styles.contactLabel, { color: colors.text }]}>Email</Text>
+              <Text style={[styles.contactSubtext, { color: colors.textSecondary }]}>suporte@lifedigital.com.br</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </Pressable>
 
-          <Pressable style={styles.contactCard} onPress={handlePhone}>
-            <Ionicons name="call" size={32} color="#34C759" />
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>Telefone</Text>
-              <Text style={styles.contactText}>0800 123 4567</Text>
+          <Pressable style={[styles.contactCard, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={handlePhone}>
+            <View style={[styles.iconWrapper, { backgroundColor: colors.accent + '20' }]}>
+              <Ionicons name="call-outline" size={24} color={colors.accent} />
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+            <View style={styles.contactInfo}>
+              <Text style={[styles.contactLabel, { color: colors.text }]}>Telefone</Text>
+              <Text style={[styles.contactSubtext, { color: colors.textSecondary }]}>0800 123 4567</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </Pressable>
         </View>
 
+        {/* FAQ */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Perguntas Frequentes</Text>
-
-          <View style={styles.faqCard}>
-            <Text style={styles.faqQuestion}>Como fazer uma simulação?</Text>
-            <Text style={styles.faqAnswer}>
-              Acesse o menu Simulações e preencha os dados solicitados.
-            </Text>
+          <View style={styles.faqHeader}>
+            <Ionicons name="help-circle-outline" size={24} color={colors.accent} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Perguntas Frequentes</Text>
           </View>
 
-          <View style={styles.faqCard}>
-            <Text style={styles.faqQuestion}>Quanto tempo leva a aprovação?</Text>
-            <Text style={styles.faqAnswer}>
-              Em média, 2 a 3 dias úteis após o envio de todos os documentos.
-            </Text>
-          </View>
-
-          <View style={styles.faqCard}>
-            <Text style={styles.faqQuestion}>Quais documentos são necessários?</Text>
-            <Text style={styles.faqAnswer}>
-              RG ou CNH, CPF, comprovante de residência e contracheque.
-            </Text>
-          </View>
+          <Accordion items={faqs} />
         </View>
       </ScrollView>
-    </View>
+      
+      <MobileNav />
+    </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   content: {
     flex: 1,
   },
   section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: spacing.md,
   },
-  contactCard: {
-    backgroundColor: '#fff',
+  faqHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    gap: 12,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  contactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    gap: spacing.md,
+  },
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   contactInfo: {
     flex: 1,
   },
   contactLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  contactText: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  faqCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  faqQuestion: {
-    fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 8,
+    marginBottom: 2,
   },
-  faqAnswer: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+  contactSubtext: {
+    fontSize: 12,
   },
 });
-

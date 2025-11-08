@@ -1,15 +1,16 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button } from '@/components';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Button, Header, MobileNav } from '@/components';
 import { useDocumentPicker } from '@/hooks/useDocumentPicker';
-import { colors, borderRadius, spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function EnviarDocumento() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const { pickDocument } = useDocumentPicker();
 
@@ -44,48 +45,48 @@ export default function EnviarDocumento() {
       return;
     }
 
-    // TODO: Implement upload to API
     Alert.alert('Sucesso', 'Documento enviado com sucesso!');
     setSelectedFile(null);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Enviar Documento</Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Enviar Documento" showBackButton />
 
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: insets.bottom + spacing.md }}>
-        <View style={styles.infoCard}>
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
+        <View style={[styles.infoCard, { backgroundColor: colors.cardSecondary }]}>
           <Ionicons name="information-circle" size={24} color={colors.accent} />
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: colors.text }]}>
             Envie fotos ou PDFs dos seus documentos
           </Text>
         </View>
 
         <View style={styles.buttonGroup}>
-          <Pressable style={styles.optionButton} onPress={handleTakePhoto}>
+          <Pressable style={[styles.optionButton, { backgroundColor: colors.card }]} onPress={handleTakePhoto}>
             <Ionicons name="camera" size={48} color={colors.accent} />
-            <Text style={styles.optionText}>Tirar Foto</Text>
+            <Text style={[styles.optionText, { color: colors.accent }]}>Tirar Foto</Text>
           </Pressable>
 
-          <Pressable style={styles.optionButton} onPress={handlePickDocument}>
+          <Pressable style={[styles.optionButton, { backgroundColor: colors.card }]} onPress={handlePickDocument}>
             <Ionicons name="document" size={48} color={colors.accent} />
-            <Text style={styles.optionText}>Escolher Arquivo</Text>
+            <Text style={[styles.optionText, { color: colors.accent }]}>Escolher Arquivo</Text>
           </Pressable>
         </View>
 
         {selectedFile && (
-          <View style={styles.previewCard}>
-            <Text style={styles.previewTitle}>Arquivo Selecionado</Text>
+          <View style={[styles.previewCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.previewTitle, { color: colors.text }]}>Arquivo Selecionado</Text>
             {selectedFile.uri && selectedFile.mimeType?.startsWith('image/') && (
               <Image source={{ uri: selectedFile.uri }} style={styles.previewImage} />
             )}
             <View style={styles.fileInfo}>
               <Ionicons name="document-text" size={24} color={colors.textSecondary} />
               <View style={styles.fileDetails}>
-                <Text style={styles.fileName}>{selectedFile.name || 'Imagem'}</Text>
-                <Text style={styles.fileSize}>
+                <Text style={[styles.fileName, { color: colors.text }]}>{selectedFile.name || 'Imagem'}</Text>
+                <Text style={[styles.fileSize, { color: colors.textSecondary }]}>
                   {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(2)} KB` : ''}
                 </Text>
               </View>
@@ -102,26 +103,28 @@ export default function EnviarDocumento() {
           </View>
         )}
 
-        <View style={styles.documentsCard}>
-          <Text style={styles.documentsTitle}>Documentos Aceitos</Text>
+        <View style={[styles.documentsCard, { backgroundColor: colors.card }]}>
+          <Text style={[styles.documentsTitle, { color: colors.text }]}>Documentos Aceitos</Text>
           <View style={styles.documentItem}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.documentText}>RG ou CNH</Text>
+            <Text style={[styles.documentText, { color: colors.textSecondary }]}>RG ou CNH</Text>
           </View>
           <View style={styles.documentItem}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.documentText}>CPF</Text>
+            <Text style={[styles.documentText, { color: colors.textSecondary }]}>CPF</Text>
           </View>
           <View style={styles.documentItem}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.documentText}>Comprovante de Residência</Text>
+            <Text style={[styles.documentText, { color: colors.textSecondary }]}>Comprovante de Residência</Text>
           </View>
           <View style={styles.documentItem}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.documentText}>Contracheque</Text>
+            <Text style={[styles.documentText, { color: colors.textSecondary }]}>Contracheque</Text>
           </View>
         </View>
       </ScrollView>
+      
+      <MobileNav />
     </SafeAreaView>
   );
 }
@@ -129,24 +132,11 @@ export default function EnviarDocumento() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: spacing.md,
-    paddingTop: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: colors.text,
   },
   content: {
     flex: 1,
   },
   infoCard: {
-    backgroundColor: colors.cardSecondary,
     margin: spacing.md,
     padding: spacing.md,
     borderRadius: borderRadius.md,
@@ -157,7 +147,6 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -167,7 +156,6 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     flex: 1,
-    backgroundColor: colors.card,
     padding: spacing.lg,
     borderRadius: borderRadius.md,
     alignItems: 'center',
@@ -176,10 +164,8 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.accent,
   },
   previewCard: {
-    backgroundColor: colors.card,
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
     padding: spacing.md,
@@ -188,7 +174,6 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: spacing.md,
   },
   previewImage: {
@@ -208,11 +193,9 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
   },
   fileSize: {
     fontSize: 12,
-    color: colors.textSecondary,
     marginTop: 2,
   },
   uploadContainer: {
@@ -220,7 +203,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   documentsCard: {
-    backgroundColor: colors.card,
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
     padding: spacing.md,
@@ -229,7 +211,6 @@ const styles = StyleSheet.create({
   documentsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: spacing.md,
   },
   documentItem: {
@@ -240,6 +221,5 @@ const styles = StyleSheet.create({
   },
   documentText: {
     fontSize: 14,
-    color: colors.textSecondary,
   },
 });

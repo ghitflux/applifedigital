@@ -1,22 +1,28 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { Input, Button } from '@/components';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Input, Button, Header, MobileNav } from '@/components';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 export default function DadosPessoais() {
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Dados Pessoais</Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header title="Dados Pessoais" showBackButton />
 
-      <ScrollView style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Informações Básicas</Text>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+      >
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Informações Básicas</Text>
 
           <Input label="Nome Completo" value={name} onChangeText={setName} />
           <Input label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
@@ -24,8 +30,8 @@ export default function DadosPessoais() {
           <Input label="CPF" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Endereço</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Endereço</Text>
 
           <Input label="CEP" keyboardType="numeric" />
           <Input label="Rua" />
@@ -40,43 +46,30 @@ export default function DadosPessoais() {
           <Button title="Salvar Alterações" onPress={() => {}} />
         </View>
       </ScrollView>
-    </View>
+      
+      <MobileNav />
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
   },
   content: {
     flex: 1,
   },
   card: {
-    backgroundColor: '#fff',
-    margin: 20,
-    padding: 20,
-    borderRadius: 16,
+    margin: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   buttonContainer: {
-    padding: 20,
+    padding: spacing.lg,
   },
 });
 

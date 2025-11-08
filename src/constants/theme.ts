@@ -1,5 +1,5 @@
-// Dark Theme Colors
-export const colors = {
+// Theme Colors
+export const darkColors = {
   primary: '#4A90E2',
   secondary: '#5856D6',
   success: '#4CAF50',
@@ -27,6 +27,43 @@ export const colors = {
   accentLight: '#6BA3E8',
 };
 
+export const lightColors = {
+  primary: '#4A90E2',
+  secondary: '#5856D6',
+  success: '#4CAF50',
+  warning: '#FFC107',
+  error: '#E53E3E',
+
+  // Light theme backgrounds
+  background: '#FFFFFF',
+  backgroundSecondary: '#F5F5F7',
+  card: '#FFFFFF',
+  cardSecondary: '#F5F5F7',
+
+  // Light theme text
+  text: '#1A1A1A',
+  textSecondary: '#6B7280',
+  textTertiary: '#9CA3AF',
+
+  // Light theme borders and dividers
+  border: '#E5E7EB',
+  divider: '#F3F4F6',
+  placeholder: '#9CA3AF',
+
+  // Accent colors
+  accent: '#4A90E2',
+  accentLight: '#6BA3E8',
+};
+
+export type ThemeMode = 'light' | 'dark';
+
+export const getColors = (mode: ThemeMode) => {
+  return mode === 'dark' ? darkColors : lightColors;
+};
+
+// Default export for backward compatibility (dark mode)
+export const colors = darkColors;
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -46,31 +83,25 @@ export const typography = {
   h1: {
     fontSize: 32,
     fontWeight: 'bold' as const,
-    color: colors.text,
   },
   h2: {
     fontSize: 24,
     fontWeight: 'bold' as const,
-    color: colors.text,
   },
   h3: {
     fontSize: 20,
     fontWeight: '600' as const,
-    color: colors.text,
   },
   body: {
     fontSize: 16,
     fontWeight: 'normal' as const,
-    color: colors.text,
   },
   caption: {
     fontSize: 14,
     fontWeight: 'normal' as const,
-    color: colors.textSecondary,
   },
   small: {
     fontSize: 12,
     fontWeight: 'normal' as const,
-    color: colors.textSecondary,
   },
 };

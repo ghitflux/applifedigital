@@ -1,4 +1,6 @@
 import { View, Text, TextInput, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
+import { borderRadius, spacing } from '@/constants/theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -13,48 +15,52 @@ export default function Input({
   style,
   ...props
 }: InputProps) {
+  const { colors } = useTheme();
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={[styles.label, { color: colors.text }]}>{label}</Text>}
       <TextInput
         style={[
           styles.input,
+          {
+            backgroundColor: colors.backgroundSecondary,
+            borderColor: error ? colors.error : colors.border,
+            color: colors.text,
+          },
           error && styles.inputError,
           style,
         ]}
-        placeholderTextColor="#8E8E93"
+        placeholderTextColor={colors.textTertiary}
         {...props}
       />
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
+    // color applied dynamically
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     fontSize: 16,
-    color: '#1a1a1a',
-    backgroundColor: '#fff',
+    // backgroundColor, borderColor, color applied dynamically
   },
   inputError: {
-    borderColor: '#FF3B30',
+    // borderColor applied dynamically
   },
   error: {
     fontSize: 12,
-    color: '#FF3B30',
-    marginTop: 4,
+    marginTop: spacing.xs,
+    // color applied dynamically
   },
 });
 
