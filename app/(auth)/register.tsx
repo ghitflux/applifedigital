@@ -63,7 +63,6 @@ export default function Register() {
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -113,3 +112,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+

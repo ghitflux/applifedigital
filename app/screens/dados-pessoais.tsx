@@ -43,7 +43,6 @@ export default function DadosPessoais() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -80,3 +79,4 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
+

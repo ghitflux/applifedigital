@@ -29,7 +29,6 @@ export default function Input({
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
@@ -58,3 +57,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+

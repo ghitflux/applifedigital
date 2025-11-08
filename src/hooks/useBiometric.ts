@@ -48,7 +48,11 @@ export function useBiometric() {
         disableDeviceFallback: false,
       });
 
-      return { success: result.success, error: result.error };
+      if (result.success) {
+        return { success: true, error: undefined };
+      } else {
+        return { success: false, error: 'Autenticação falhou' };
+      }
     } catch (error) {
       return { success: false, error: 'Erro na autenticação' };
     }

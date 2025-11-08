@@ -1,16 +1,18 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, typography, borderRadius, spacing } from '@/constants/theme';
 
 export default function Simulacoes() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Simulações</Text>
       </View>
 
       <ScrollView style={styles.content}>
         <Pressable style={styles.newSimulation}>
-          <Ionicons name="add-circle" size={48} color="#007AFF" />
+          <Ionicons name="add-circle" size={48} color={colors.accent} />
           <Text style={styles.newSimulationText}>Nova Simulação</Text>
           <Text style={styles.newSimulationSubtext}>
             Simule um empréstimo consignável
@@ -20,7 +22,7 @@ export default function Simulacoes() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Simulações Salvas</Text>
           <View style={styles.emptyState}>
-            <Ionicons name="document-outline" size={48} color="#8E8E93" />
+            <Ionicons name="document-outline" size={48} color={colors.textTertiary} />
             <Text style={styles.emptyText}>Nenhuma simulação salva</Text>
             <Text style={styles.emptySubtext}>
               Suas simulações aparecerão aqui
@@ -28,75 +30,68 @@ export default function Simulacoes() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    padding: spacing.md,
+    paddingTop: spacing.md,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   content: {
     flex: 1,
   },
   newSimulation: {
-    backgroundColor: '#fff',
-    margin: 20,
-    padding: 32,
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    margin: spacing.md,
+    padding: spacing.xl,
+    borderRadius: borderRadius.lg,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: colors.accent,
     borderStyle: 'dashed',
   },
   newSimulationText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginTop: 12,
+    color: colors.accent,
+    marginTop: spacing.sm,
   },
   newSimulationSubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   section: {
-    padding: 20,
+    padding: spacing.md,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 16,
+    color: colors.text,
+    marginBottom: spacing.md,
   },
   emptyState: {
-    backgroundColor: '#fff',
-    padding: 40,
-    borderRadius: 12,
+    backgroundColor: colors.card,
+    padding: spacing.xl,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   emptyText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginTop: 12,
+    color: colors.text,
+    marginTop: spacing.sm,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 4,
   },
 });
+

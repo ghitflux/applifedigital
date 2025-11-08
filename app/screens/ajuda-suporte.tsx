@@ -80,7 +80,6 @@ export default function AjudaSuporte() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -151,3 +150,4 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
+

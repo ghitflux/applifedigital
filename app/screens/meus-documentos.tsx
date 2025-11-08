@@ -2,9 +2,15 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
+interface Document {
+  id: string;
+  name: string;
+  status: string;
+}
+
 export default function MeusDocumentos() {
   const router = useRouter();
-  const documents = [];
+  const documents: Document[] = [];
 
   return (
     <View style={styles.container}>
@@ -30,7 +36,7 @@ export default function MeusDocumentos() {
             </Text>
           </View>
         ) : (
-          documents.map((doc: any) => (
+          documents.map((doc) => (
             <View key={doc.id} style={styles.documentCard}>
               <Ionicons name="document" size={24} color="#007AFF" />
               <View style={styles.documentInfo}>
@@ -45,7 +51,6 @@ export default function MeusDocumentos() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -120,3 +125,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+

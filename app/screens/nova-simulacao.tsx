@@ -83,7 +83,6 @@ export default function NovaSimulacao() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -125,3 +124,4 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
+

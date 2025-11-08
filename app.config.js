@@ -36,7 +36,7 @@ module.exports = {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.API_URL || "http://localhost:3000",
+      apiUrl: process.env.API_URL || "http://localhost:8000",
     }
   }
 };

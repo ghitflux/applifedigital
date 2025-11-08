@@ -1,10 +1,14 @@
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
-import { Button, Input, Loading } from '@/components';
+import { Alert, View, Text, ScrollView, StyleSheet } from 'react-native';
+import { Button, Input, Loading, Card } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@/utils/formatters';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/constants/theme';
 
 export default function ConsultarMargem() {
+  const insets = useSafeAreaInsets();
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
   const [marginData, setMarginData] = useState<any>(null);
@@ -34,175 +38,181 @@ export default function ConsultarMargem() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Consultar Margem</Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <View style={styles.content}>
+        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+          <Text style={styles.headerTitle}>Consultar Margem</Text>
+        </View>
+
+        <ScrollView style={styles.scrollView}>
+          {!marginData ? (
+            <View style={styles.section}>
+              <View style={styles.infoCard}>
+                <Ionicons name="information-circle-outline" size={24} color={colors.primary} />
+                <Text style={styles.infoText}>
+                  Consulte sua margem consignável disponível
+                </Text>
+              </View>
+
+              <Card>
+                <Input
+                  label="CPF"
+                  placeholder="000.000.000-00"
+                  keyboardType="numeric"
+                  value={cpf}
+                  onChangeText={setCpf}
+                />
+
+                <Button title="Consultar" onPress={handleConsult} />
+              </Card>
+            </View>
+          ) : (
+            <>
+              <Card style={styles.successCard}>
+                <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
+                <Text style={styles.successText}>Consulta Realizada!</Text>
+              </Card>
+
+              <Card style={styles.marginCard}>
+                <View style={styles.marginItem}>
+                  <Text style={styles.label}>Margem Total</Text>
+                  <Text style={styles.value}>
+                    {formatCurrency(marginData.totalMargin)}
+                  </Text>
+                </View>
+
+                <View style={styles.marginItem}>
+                  <Text style={styles.label}>Margem Utilizada</Text>
+                  <Text style={[styles.value, { color: colors.error }]}>
+                    {formatCurrency(marginData.usedMargin)}
+                  </Text>
+                </View>
+
+                <View style={styles.separator} />
+
+                <View style={styles.marginItem}>
+                  <Text style={styles.labelBold}>Margem Disponível</Text>
+                  <Text style={styles.valueLarge}>
+                    {formatCurrency(marginData.availableMargin)}
+                  </Text>
+                </View>
+
+                <View style={styles.separator} />
+
+                <View style={styles.marginItem}>
+                  <Text style={styles.label}>Empregador</Text>
+                  <Text style={styles.valueText}>{marginData.employer}</Text>
+                </View>
+
+                <View style={styles.marginItem}>
+                  <Text style={styles.label}>Tipo de Vínculo</Text>
+                  <Text style={styles.valueText}>{marginData.employmentType}</Text>
+                </View>
+              </Card>
+
+              <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + 20 }]}>
+                <Button
+                  title="Nova Consulta"
+                  variant="outline"
+                  onPress={() => setMarginData(null)}
+                />
+              </View>
+            </>
+          )}
+        </ScrollView>
       </View>
-
-      <ScrollView style={styles.content}>
-        {!marginData ? (
-          <View style={styles.form}>
-            <View style={styles.infoCard}>
-              <Ionicons name="information-circle-outline" size={24} color="#007AFF" />
-              <Text style={styles.infoText}>
-                Consulte sua margem consignável disponível
-              </Text>
-            </View>
-
-            <View style={styles.card}>
-              <Input
-                label="CPF"
-                placeholder="000.000.000-00"
-                keyboardType="numeric"
-                value={cpf}
-                onChangeText={setCpf}
-              />
-
-              <Button title="Consultar" onPress={handleConsult} />
-            </View>
-          </View>
-        ) : (
-          <>
-            <View style={styles.resultCard}>
-              <Ionicons name="checkmark-circle" size={48} color="#34C759" />
-              <Text style={styles.resultTitle}>Consulta Realizada!</Text>
-            </View>
-
-            <View style={styles.card}>
-              <View style={styles.marginItem}>
-                <Text style={styles.marginLabel}>Margem Total</Text>
-                <Text style={styles.marginValue}>
-                  {formatCurrency(marginData.totalMargin)}
-                </Text>
-              </View>
-
-              <View style={styles.marginItem}>
-                <Text style={styles.marginLabel}>Margem Utilizada</Text>
-                <Text style={[styles.marginValue, { color: '#FF3B30' }]}>
-                  {formatCurrency(marginData.usedMargin)}
-                </Text>
-              </View>
-
-              <View style={styles.divider} />
-
-              <View style={styles.marginItem}>
-                <Text style={styles.marginLabelBold}>Margem Disponível</Text>
-                <Text style={styles.marginValueBold}>
-                  {formatCurrency(marginData.availableMargin)}
-                </Text>
-              </View>
-
-              <View style={styles.divider} />
-
-              <View style={styles.marginItem}>
-                <Text style={styles.marginLabel}>Empregador</Text>
-                <Text style={styles.marginValue}>{marginData.employer}</Text>
-              </View>
-
-              <View style={styles.marginItem}>
-                <Text style={styles.marginLabel}>Tipo de Vínculo</Text>
-                <Text style={styles.marginValue}>{marginData.employmentType}</Text>
-              </View>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Nova Consulta"
-                variant="outline"
-                onPress={() => setMarginData(null)}
-              />
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
   },
-  form: {
+  header: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  section: {
     padding: 20,
   },
   infoCard: {
-    backgroundColor: '#EBF5FF',
+    backgroundColor: `${colors.primary}1A`,
     padding: 16,
     borderRadius: 12,
     flexDirection: 'row',
     gap: 12,
     marginBottom: 20,
+    alignItems: 'center',
   },
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: '#1a1a1a',
+    color: colors.text,
   },
-  card: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 16,
-  },
-  resultCard: {
-    backgroundColor: '#fff',
+  successCard: {
     margin: 20,
     padding: 32,
-    borderRadius: 16,
     alignItems: 'center',
   },
-  resultTitle: {
+  successText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontWeight: '700',
+    color: colors.text,
     marginTop: 12,
+  },
+  marginCard: {
+    marginHorizontal: 20,
   },
   marginItem: {
     paddingVertical: 12,
   },
-  marginLabel: {
+  label: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
-  marginValue: {
+  labelBold: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  value: {
     fontSize: 18,
-    color: '#1a1a1a',
+    color: colors.text,
     fontWeight: '500',
   },
-  marginLabelBold: {
-    fontSize: 16,
-    color: '#1a1a1a',
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  marginValueBold: {
+  valueLarge: {
     fontSize: 24,
-    color: '#34C759',
-    fontWeight: 'bold',
+    color: colors.success,
+    fontWeight: '700',
   },
-  divider: {
+  valueText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  separator: {
     height: 1,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.border,
     marginVertical: 8,
   },
   buttonContainer: {
     padding: 20,
   },
 });
+

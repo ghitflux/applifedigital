@@ -59,7 +59,6 @@ export default function Button({
     </Pressable>
   );
 }
-
 const styles = StyleSheet.create({
   button: {
     paddingHorizontal: 24,
@@ -96,3 +95,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+

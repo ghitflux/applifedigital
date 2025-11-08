@@ -1,11 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components';
 import { useDocumentPicker } from '@/hooks/useDocumentPicker';
+import { colors, borderRadius, spacing } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function EnviarDocumento() {
+  const insets = useSafeAreaInsets();
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const { pickDocument } = useDocumentPicker();
 
@@ -46,14 +50,14 @@ export default function EnviarDocumento() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Text style={styles.title}>Enviar Documento</Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: insets.bottom + spacing.md }}>
         <View style={styles.infoCard}>
-          <Ionicons name="information-circle" size={24} color="#007AFF" />
+          <Ionicons name="information-circle" size={24} color={colors.accent} />
           <Text style={styles.infoText}>
             Envie fotos ou PDFs dos seus documentos
           </Text>
@@ -61,12 +65,12 @@ export default function EnviarDocumento() {
 
         <View style={styles.buttonGroup}>
           <Pressable style={styles.optionButton} onPress={handleTakePhoto}>
-            <Ionicons name="camera" size={48} color="#007AFF" />
+            <Ionicons name="camera" size={48} color={colors.accent} />
             <Text style={styles.optionText}>Tirar Foto</Text>
           </Pressable>
 
           <Pressable style={styles.optionButton} onPress={handlePickDocument}>
-            <Ionicons name="document" size={48} color="#007AFF" />
+            <Ionicons name="document" size={48} color={colors.accent} />
             <Text style={styles.optionText}>Escolher Arquivo</Text>
           </Pressable>
         </View>
@@ -78,7 +82,7 @@ export default function EnviarDocumento() {
               <Image source={{ uri: selectedFile.uri }} style={styles.previewImage} />
             )}
             <View style={styles.fileInfo}>
-              <Ionicons name="document-text" size={24} color="#666" />
+              <Ionicons name="document-text" size={24} color={colors.textSecondary} />
               <View style={styles.fileDetails}>
                 <Text style={styles.fileName}>{selectedFile.name || 'Imagem'}</Text>
                 <Text style={styles.fileSize}>
@@ -86,7 +90,7 @@ export default function EnviarDocumento() {
                 </Text>
               </View>
               <Pressable onPress={() => setSelectedFile(null)}>
-                <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                <Ionicons name="close-circle" size={24} color={colors.error} />
               </Pressable>
             </View>
           </View>
@@ -101,102 +105,102 @@ export default function EnviarDocumento() {
         <View style={styles.documentsCard}>
           <Text style={styles.documentsTitle}>Documentos Aceitos</Text>
           <View style={styles.documentItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.documentText}>RG ou CNH</Text>
           </View>
           <View style={styles.documentItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.documentText}>CPF</Text>
           </View>
           <View style={styles.documentItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.documentText}>Comprovante de Residência</Text>
           </View>
           <View style={styles.documentItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.documentText}>Contracheque</Text>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
+    padding: spacing.md,
+    paddingTop: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   content: {
     flex: 1,
   },
   infoCard: {
-    backgroundColor: '#EBF5FF',
-    margin: 20,
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: colors.cardSecondary,
+    margin: spacing.md,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.sm,
+    alignItems: 'center',
   },
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: '#1a1a1a',
+    color: colors.text,
   },
   buttonGroup: {
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   optionButton: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 24,
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   optionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#007AFF',
+    color: colors.accent,
   },
   previewCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
   },
   previewTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 16,
+    color: colors.text,
+    marginBottom: spacing.md,
   },
   previewImage: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.md,
   },
   fileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   fileDetails: {
     flex: 1,
@@ -204,38 +208,38 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   fileSize: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   uploadContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   documentsCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
   },
   documentsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 16,
+    color: colors.text,
+    marginBottom: spacing.md,
   },
   documentItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   documentText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
   },
 });

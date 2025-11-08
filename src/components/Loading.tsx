@@ -12,7 +12,6 @@ export default function Loading({ size = 'large', color = '#007AFF' }: LoadingPr
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -21,3 +20,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F2F7',
   },
 });
+
