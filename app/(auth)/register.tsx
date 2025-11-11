@@ -1,20 +1,50 @@
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Register() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
-    // TODO: Implement register logic
-    router.replace('/(tabs)/dashboard');
+  const handleRegister = async () => {
+    // Validations
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não coincidem');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    const result = await register({ name, email, password });
+    setLoading(false);
+
+    if (result.success) {
+      Alert.alert(
+        'Sucesso',
+        'Conta criada com sucesso! Faça login para continuar.',
+        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+      );
+    } else {
+      Alert.alert('Erro', result.error || 'Erro ao criar conta');
+    }
   };
 
   return (
@@ -59,8 +89,16 @@ export default function Register() {
           secureTextEntry
         />
 
-        <Pressable style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleRegister}>
-          <Text style={[styles.buttonText, { color: colors.text }]}>Criar Conta</Text>
+        <Pressable
+          style={[styles.button, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={colors.text} />
+          ) : (
+            <Text style={[styles.buttonText, { color: colors.text }]}>Criar Conta</Text>
+          )}
         </Pressable>
 
         <Pressable onPress={() => router.back()}>

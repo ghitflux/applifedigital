@@ -1,7 +1,8 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:8000';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -11,14 +12,13 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor - Add auth token to all requests
 api.interceptors.request.use(
   async (config) => {
-    // TODO: Add auth token from SecureStore
-    // const token = await SecureStore.getItemAsync('authToken');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = await SecureStore.getItemAsync('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -26,12 +26,14 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor - Handle unauthorized errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // TODO: Handle unauthorized - logout user
+      // Clear token on unauthorized
+      await SecureStore.deleteItemAsync('authToken');
+      // Note: The useAuth hook will handle navigation to login
     }
     return Promise.reject(error);
   }

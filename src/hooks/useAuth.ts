@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { api } from '../services/api';
 
 interface User {
   id: string;
@@ -19,11 +20,14 @@ export function useAuth() {
     try {
       const token = await SecureStore.getItemAsync('authToken');
       if (token) {
-        // TODO: Validate token and load user data
-        // For now, just set a dummy user
+        // Fetch user data from backend
+        const response = await api.get('/api/v1/users/me');
+        setUser(response.data);
       }
     } catch (error) {
       console.error('Error loading user:', error);
+      // If token is invalid, clear it
+      await SecureStore.deleteItemAsync('authToken');
     } finally {
       setLoading(false);
     }
@@ -31,29 +35,35 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Implement API call
-      // const response = await api.post('/auth/login', { email, password });
-      // await SecureStore.setItemAsync('authToken', response.data.token);
-      // setUser(response.data.user);
+      // Call backend login endpoint
+      const response = await api.post('/api/v1/auth/login', { email, password });
+      const { access_token } = response.data;
 
-      // Dummy implementation
-      const dummyUser = { id: '1', email, name: 'Usuário Teste' };
-      setUser(dummyUser);
-      await SecureStore.setItemAsync('authToken', 'dummy-token');
+      // Store token
+      await SecureStore.setItemAsync('authToken', access_token);
+
+      // Fetch user data
+      const userResponse = await api.get('/api/v1/users/me');
+      setUser(userResponse.data);
+
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      return { success: false, error: 'Erro ao fazer login' };
+      const message = error.response?.data?.detail || 'Erro ao fazer login';
+      return { success: false, error: message };
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (data: { name: string; email: string; password: string; cpf?: string; phone?: string }) => {
     try {
-      // TODO: Implement API call
+      // Call backend register endpoint
+      await api.post('/api/v1/auth/register', data);
+      // Backend doesn't auto-login, so user needs to login after registration
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Register error:', error);
-      return { success: false, error: 'Erro ao criar conta' };
+      const message = error.response?.data?.detail || 'Erro ao criar conta';
+      return { success: false, error: message };
     }
   };
 

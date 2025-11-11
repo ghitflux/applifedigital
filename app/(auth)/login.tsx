@@ -1,19 +1,34 @@
-import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // TODO: Implement login logic
-    router.replace('/(tabs)/dashboard');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    setLoading(true);
+    const result = await login(email, password);
+    setLoading(false);
+
+    if (result.success) {
+      router.replace('/(tabs)/dashboard');
+    } else {
+      Alert.alert('Erro', result.error || 'Erro ao fazer login');
+    }
   };
 
   return (
@@ -49,8 +64,16 @@ export default function Login() {
           secureTextEntry
         />
 
-        <Pressable style={[styles.button, { backgroundColor: colors.primary }]} onPress={handleLogin}>
-          <Text style={[styles.buttonText, { color: colors.text }]}>Entrar</Text>
+        <Pressable
+          style={[styles.button, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={colors.text} />
+          ) : (
+            <Text style={[styles.buttonText, { color: colors.text }]}>Entrar</Text>
+          )}
         </Pressable>
 
         <View style={styles.separator}>
