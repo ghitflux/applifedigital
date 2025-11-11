@@ -1,15 +1,64 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
+import { api } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Dashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>({
+    margin: null,
+    latestSimulation: null,
+    documentsCount: 0,
+    approvedDocuments: 0,
+  });
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch all data in parallel
+      const [simulations, documents] = await Promise.all([
+        api.get('/api/v1/simulations'),
+        api.get('/api/v1/documents'),
+      ]);
+
+      // Get latest pending simulation
+      const latestPending = simulations.data.find((s: any) => s.status === 'pending');
+
+      // Count approved documents
+      const approvedDocs = documents.data.filter((d: any) => d.status === 'approved');
+
+      setDashboardData({
+        margin: null, // Will come from real margin API later
+        latestSimulation: latestPending,
+        documentsCount: documents.data.length,
+        approvedDocuments: approvedDocs.length,
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchDashboardData();
+  }, []);
 
   const handleConsultarMargem = () => {
     router.push('/screens/consultar-margem');
@@ -27,12 +76,28 @@ export default function Dashboard() {
     router.push('/screens/ajuda-suporte');
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <Header />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando dashboard...</Text>
+        </View>
+        <MobileNav />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header />
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
+        }
       >
 
       <View style={styles.section}>
@@ -74,26 +139,41 @@ export default function Dashboard() {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Status Atual</Text>
         
         <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
-          <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+          <Ionicons
+            name={dashboardData.approvedDocuments === dashboardData.documentsCount ? "checkmark-circle" : "document-text"}
+            size={24}
+            color={dashboardData.approvedDocuments === dashboardData.documentsCount ? colors.success : colors.warning}
+          />
           <View style={styles.statusContent}>
             <Text style={[styles.statusTitle, { color: colors.text }]}>Documentos</Text>
-            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Todos verificados</Text>
+            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>
+              {dashboardData.documentsCount === 0
+                ? 'Nenhum documento enviado'
+                : `${dashboardData.approvedDocuments}/${dashboardData.documentsCount} aprovados`}
+            </Text>
           </View>
-        </View>
-
-        <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
-          <Ionicons name="time-outline" size={24} color={colors.warning} />
-          <View style={styles.statusContent}>
-            <Text style={[styles.statusTitle, { color: colors.text }]}>Simulação #1234</Text>
-            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Em análise</Text>
-          </View>
-          <Pressable onPress={() => router.push({
-            pathname: '/screens/detalhes-simulacao',
-            params: { id: '1234' }
-          })}>
+          <Pressable onPress={() => router.push('/screens/meus-documentos')}>
             <Text style={[styles.statusLink, { color: colors.accent }]}>Ver</Text>
           </Pressable>
         </View>
+
+        {dashboardData.latestSimulation && (
+          <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
+            <Ionicons name="time-outline" size={24} color={colors.warning} />
+            <View style={styles.statusContent}>
+              <Text style={[styles.statusTitle, { color: colors.text }]}>
+                Simulação #{dashboardData.latestSimulation.id.substring(0, 8)}
+              </Text>
+              <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Em análise</Text>
+            </View>
+            <Pressable onPress={() => router.push({
+              pathname: '/screens/detalhes-simulacao',
+              params: { id: dashboardData.latestSimulation.id }
+            })}>
+              <Text style={[styles.statusLink, { color: colors.accent }]}>Ver</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
       </ScrollView>
       
@@ -105,6 +185,15 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  loadingText: {
+    fontSize: 14,
   },
   scrollView: {
     flex: 1,

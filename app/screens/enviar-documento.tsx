@@ -1,17 +1,20 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Header, MobileNav } from '@/components';
+import { Button, Header, MobileNav, Input } from '@/components';
 import { useDocumentPicker } from '@/hooks/useDocumentPicker';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
+import { api } from '@/services/api';
 
 export default function EnviarDocumento() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [documentType, setDocumentType] = useState('');
+  const [loading, setLoading] = useState(false);
   const { pickDocument } = useDocumentPicker();
 
   const handlePickDocument = async () => {
@@ -39,14 +42,39 @@ export default function EnviarDocumento() {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedFile) {
       Alert.alert('Erro', 'Selecione um documento primeiro');
       return;
     }
 
-    Alert.alert('Sucesso', 'Documento enviado com sucesso!');
-    setSelectedFile(null);
+    if (!documentType) {
+      Alert.alert('Erro', 'Selecione o tipo de documento');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Note: Backend currently only saves metadata (no actual file storage)
+      // In a production app, you would upload to S3/Cloudinary first, then send URL
+      const documentData = {
+        document_type: documentType,
+        file_name: selectedFile.name || `document_${Date.now()}.jpg`,
+        file_url: selectedFile.uri || '', // In production, this would be the S3 URL
+        file_size: selectedFile.size || 0,
+      };
+
+      await api.post('/api/v1/documents', documentData);
+
+      Alert.alert('Sucesso', 'Documento enviado com sucesso!');
+      setSelectedFile(null);
+      setDocumentType('');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao enviar documento');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,12 +122,41 @@ export default function EnviarDocumento() {
                 <Ionicons name="close-circle" size={24} color={colors.error} />
               </Pressable>
             </View>
+
+            <View style={styles.typeSelector}>
+              <Text style={[styles.typeLabel, { color: colors.text }]}>Tipo de Documento *</Text>
+              <View style={styles.typeButtons}>
+                {['RG', 'CPF', 'CNH', 'Comprovante', 'Contracheque'].map((type) => (
+                  <Pressable
+                    key={type}
+                    style={[
+                      styles.typeButton,
+                      { backgroundColor: documentType === type ? colors.accent : colors.background },
+                    ]}
+                    onPress={() => setDocumentType(type)}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        { color: documentType === type ? colors.text : colors.textSecondary },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
           </View>
         )}
 
         {selectedFile && (
           <View style={styles.uploadContainer}>
-            <Button title="Enviar Documento" onPress={handleUpload} />
+            <Button
+              title={loading ? 'Enviando...' : 'Enviar Documento'}
+              onPress={handleUpload}
+              disabled={loading}
+            />
           </View>
         )}
 
@@ -221,5 +278,30 @@ const styles = StyleSheet.create({
   },
   documentText: {
     fontSize: 14,
+  },
+  typeSelector: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  typeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+  },
+  typeButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  typeButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+  },
+  typeButtonText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

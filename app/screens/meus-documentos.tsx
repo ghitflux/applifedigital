@@ -1,30 +1,91 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header, MobileNav } from '@/components';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
+import { api } from '@/services/api';
 
 interface Document {
   id: string;
-  name: string;
+  document_type: string;
+  file_name: string;
   status: string;
+  created_at: string;
 }
 
 export default function MeusDocumentos() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const documents: Document[] = [];
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await api.get('/api/v1/documents');
+      setDocuments(response.data);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchDocuments();
+  }, []);
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Aguardando análise';
+      case 'approved': return 'Aprovado';
+      case 'rejected': return 'Rejeitado';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return colors.warning || '#f59e0b';
+      case 'approved': return colors.success || '#22c55e';
+      case 'rejected': return colors.error || '#ef4444';
+      default: return colors.textSecondary;
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <Header title="Meus Documentos" showBackButton />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando documentos...</Text>
+        </View>
+        <MobileNav />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header title="Meus Documentos" showBackButton />
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
+        }
       >
         <Pressable
           style={[styles.uploadButton, { backgroundColor: colors.card }]}
@@ -47,10 +108,17 @@ export default function MeusDocumentos() {
             <View key={doc.id} style={[styles.documentCard, { backgroundColor: colors.card }]}>
               <Ionicons name="document" size={24} color={colors.accent} />
               <View style={styles.documentInfo}>
-                <Text style={[styles.documentName, { color: colors.text }]}>{doc.name}</Text>
-                <Text style={[styles.documentStatus, { color: colors.textSecondary }]}>{doc.status}</Text>
+                <Text style={[styles.documentName, { color: colors.text }]}>
+                  {doc.document_type} - {doc.file_name}
+                </Text>
+                <Text style={[styles.documentStatus, { color: getStatusColor(doc.status) }]}>
+                  {getStatusText(doc.status)}
+                </Text>
+                <Text style={[styles.documentDate, { color: colors.textTertiary }]}>
+                  {new Date(doc.created_at).toLocaleDateString('pt-BR')}
+                </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+              <Ionicons name="checkmark-circle" size={20} color={getStatusColor(doc.status)} />
             </View>
           ))
         )}
@@ -66,6 +134,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  loadingText: {
+    fontSize: 14,
   },
   uploadButton: {
     margin: spacing.lg,
@@ -111,6 +188,11 @@ const styles = StyleSheet.create({
   },
   documentStatus: {
     fontSize: 14,
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  documentDate: {
+    fontSize: 12,
     marginTop: 2,
   },
 });
