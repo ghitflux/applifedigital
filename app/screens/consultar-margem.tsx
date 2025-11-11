@@ -6,13 +6,22 @@ import { formatCurrency } from '@/utils/formatters';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
+import { api } from '@/services/api';
+
+interface MarginData {
+  total_margin: number;
+  used_margin: number;
+  available_margin: number;
+  employer: string;
+  employment_type: string;
+}
 
 export default function ConsultarMargem() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
-  const [marginData, setMarginData] = useState<any>(null);
+  const [marginData, setMarginData] = useState<MarginData | null>(null);
 
   const handleConsult = async () => {
     if (!cpf) {
@@ -20,17 +29,24 @@ export default function ConsultarMargem() {
       return;
     }
 
+    // Basic CPF format validation
+    const cpfNumbers = cpf.replace(/\D/g, '');
+    if (cpfNumbers.length !== 11) {
+      Alert.alert('Erro', 'CPF inválido. Digite 11 dígitos.');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setMarginData({
-        totalMargin: 15000,
-        usedMargin: 3000,
-        availableMargin: 12000,
-        employer: 'Empresa Exemplo',
-        employmentType: 'CLT',
-      });
+    try {
+      const response = await api.post('/api/v1/margins', { cpf: cpfNumbers });
+      setMarginData(response.data);
+    } catch (error: any) {
+      console.error('Margin consultation error:', error);
+      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao consultar margem');
       setLoading(false);
-    }, 2000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -77,14 +93,14 @@ export default function ConsultarMargem() {
                 <View style={styles.marginItem}>
                   <Text style={[styles.label, { color: colors.textSecondary }]}>Margem Total</Text>
                   <Text style={[styles.value, { color: colors.text }]}>
-                    {formatCurrency(marginData.totalMargin)}
+                    {formatCurrency(marginData.total_margin)}
                   </Text>
                 </View>
 
                 <View style={styles.marginItem}>
                   <Text style={[styles.label, { color: colors.textSecondary }]}>Margem Utilizada</Text>
                   <Text style={[styles.value, { color: colors.error }]}>
-                    {formatCurrency(marginData.usedMargin)}
+                    {formatCurrency(marginData.used_margin)}
                   </Text>
                 </View>
 
@@ -93,7 +109,7 @@ export default function ConsultarMargem() {
                 <View style={styles.marginItem}>
                   <Text style={[styles.labelBold, { color: colors.text }]}>Margem Disponível</Text>
                   <Text style={[styles.valueLarge, { color: colors.success }]}>
-                    {formatCurrency(marginData.availableMargin)}
+                    {formatCurrency(marginData.available_margin)}
                   </Text>
                 </View>
 
@@ -106,7 +122,7 @@ export default function ConsultarMargem() {
 
                 <View style={styles.marginItem}>
                   <Text style={[styles.label, { color: colors.textSecondary }]}>Tipo de Vínculo</Text>
-                  <Text style={[styles.valueText, { color: colors.text }]}>{marginData.employmentType}</Text>
+                  <Text style={[styles.valueText, { color: colors.text }]}>{marginData.employment_type}</Text>
                 </View>
               </Card>
 

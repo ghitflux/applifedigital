@@ -1,20 +1,21 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Animated, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
+import { api } from '@/services/api';
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  isRead: boolean;
-  createdAt: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
 }
 
 export default function Notificacoes() {
@@ -22,68 +23,91 @@ export default function Notificacoes() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await api.get('/api/v1/notifications');
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchNotifications();
+  }, []);
 
   const handleBack = () => {
     router.push('/(tabs)/dashboard');
   };
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: 'Simulação Aprovada!',
-      message: 'Sua simulação #1233 foi aprovada. Revise os termos e prossiga.',
-      type: 'success',
-      isRead: false,
-      createdAt: 'Há 2 horas',
-    },
-    {
-      id: '2',
-      title: 'Documento Verificado',
-      message: 'Seu contracheque foi verificado com sucesso.',
-      type: 'info',
-      isRead: false,
-      createdAt: 'Hoje, 14:30',
-    },
-    {
-      id: '3',
-      title: 'Simulação em Análise',
-      message: 'Sua solicitação #1234 está sendo analisada pela equipe.',
-      type: 'warning',
-      isRead: true,
-      createdAt: 'Ontem, 18:45',
-    },
-    {
-      id: '4',
-      title: 'Bem-vindo!',
-      message: 'Seja bem-vindo ao nosso app de crédito consignado.',
-      type: 'info',
-      isRead: true,
-      createdAt: '15 Out 2025',
-    },
-  ]);
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
-    );
-    swipeableRefs.current[id]?.close();
+  const markAsRead = async (id: string) => {
+    try {
+      await api.put(`/api/v1/notifications/${id}/read`);
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === id ? { ...notif, is_read: true } : notif
+        )
+      );
+      swipeableRefs.current[id]?.close();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
   const deleteNotification = (id: string) => {
+    // Just hide locally (backend doesn't have delete endpoint)
     setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, isRead: true }))
-    );
-    Object.values(swipeableRefs.current).forEach(ref => {
-      if (ref) ref.close();
-    });
+  const markAllAsRead = async () => {
+    try {
+      // Mark all unread notifications as read
+      const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
+      await Promise.all(unreadIds.map(id => api.put(`/api/v1/notifications/${id}/read`)));
+
+      setNotifications(prev =>
+        prev.map(notif => ({ ...notif, is_read: true }))
+      );
+
+      Object.values(swipeableRefs.current).forEach(ref => {
+        if (ref) ref.close();
+      });
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `Há ${diffMins} minuto${diffMins !== 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `Há ${diffHours} hora${diffHours !== 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `Há ${diffDays} dia${diffDays !== 1 ? 's' : ''}`;
+    } else {
+      return date.toLocaleDateString('pt-BR');
+    }
   };
 
   const getIconName = (type: string) => {
@@ -124,6 +148,21 @@ export default function Notificacoes() {
         return colors.accent + '20';
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+        <Header title="Notificações" showBackButton onBackPress={handleBack} />
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles.emptySubtext, { color: colors.textSecondary, marginTop: spacing.md }]}>
+            Carregando notificações...
+          </Text>
+        </View>
+        <MobileNav />
+      </SafeAreaView>
+    );
+  }
 
   if (notifications.length === 0) {
     return (
@@ -189,9 +228,12 @@ export default function Notificacoes() {
         )}
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.list}
         contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
+        }
       >
         {notifications.map((notification) => (
           <Swipeable
@@ -212,7 +254,7 @@ export default function Notificacoes() {
               style={[
                 styles.notification,
                 { backgroundColor: colors.card },
-                !notification.isRead && { borderLeftColor: colors.accent, borderLeftWidth: 3 }
+                !notification.is_read && { borderLeftColor: colors.accent, borderLeftWidth: 3 }
               ]}
             >
               <View style={[styles.iconContainer, { backgroundColor: getIconBackground(notification.type) }]}>
@@ -225,9 +267,9 @@ export default function Notificacoes() {
               <View style={styles.content}>
                 <Text style={[styles.notificationTitle, { color: colors.text }]}>{notification.title}</Text>
                 <Text style={[styles.notificationMessage, { color: colors.textSecondary }]}>{notification.message}</Text>
-                <Text style={[styles.notificationTime, { color: colors.textSecondary }]}>{notification.createdAt}</Text>
+                <Text style={[styles.notificationTime, { color: colors.textSecondary }]}>{formatDate(notification.created_at)}</Text>
               </View>
-              {!notification.isRead && <View style={[styles.unreadDot, { backgroundColor: colors.accent }]} />}
+              {!notification.is_read && <View style={[styles.unreadDot, { backgroundColor: colors.accent }]} />}
             </Pressable>
           </Swipeable>
         ))}
