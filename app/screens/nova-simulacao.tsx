@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input, Button, Header, MobileNav } from '@/components';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
+import { api } from '@/services/api';
 
 export default function NovaSimulacao() {
   const router = useRouter();
@@ -13,8 +14,9 @@ export default function NovaSimulacao() {
   const [amount, setAmount] = useState('');
   const [installments, setInstallments] = useState('');
   const [interestRate] = useState('2.5'); // Fixed rate for now
+  const [loading, setLoading] = useState(false);
 
-  const handleSimulate = () => {
+  const handleSimulate = async () => {
     if (!amount || !installments) {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
@@ -22,26 +24,31 @@ export default function NovaSimulacao() {
 
     const requestedAmount = parseFloat(amount);
     const numInstallments = parseInt(installments);
-    const rate = parseFloat(interestRate) / 100;
+    const rate = parseFloat(interestRate);
 
-    // Calculate installment value
-    const installmentValue =
-      (requestedAmount * rate * Math.pow(1 + rate, numInstallments)) /
-      (Math.pow(1 + rate, numInstallments) - 1);
-
-    const totalAmount = installmentValue * numInstallments;
-
-    // Navigate to results
-    router.push({
-      pathname: '/screens/resultado-simulacao',
-      params: {
-        requestedAmount: requestedAmount.toFixed(2),
+    setLoading(true);
+    try {
+      // Create simulation on backend
+      const response = await api.post('/api/v1/simulations', {
+        simulation_type: 'consignado',
+        requested_amount: requestedAmount,
         installments: numInstallments,
-        interestRate,
-        installmentValue: installmentValue.toFixed(2),
-        totalAmount: totalAmount.toFixed(2),
-      },
-    });
+        interest_rate: rate,
+      });
+
+      const simulation = response.data;
+
+      // Navigate to simulation details with the created simulation ID
+      router.push({
+        pathname: '/screens/detalhes-simulacao',
+        params: { id: simulation.id },
+      });
+    } catch (error: any) {
+      console.error('Simulation error:', error);
+      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao criar simulação');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,7 +90,11 @@ export default function NovaSimulacao() {
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button title="Simular" onPress={handleSimulate} />
+          <Button
+            title={loading ? "Criando simulação..." : "Simular"}
+            onPress={handleSimulate}
+            disabled={loading}
+          />
         </View>
       </ScrollView>
       

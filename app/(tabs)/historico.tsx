@@ -1,65 +1,70 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
+import { api } from '@/services/api';
 
 interface Simulation {
   id: string;
-  type: 'Refinanciamento' | 'Novo Empréstimo';
-  number: string;
-  amount: string;
-  status: 'Em Análise' | 'Aprovado' | 'Rejeitado';
-  date: string;
+  simulation_type: string;
+  requested_amount: number;
+  installments: number;
+  interest_rate: number;
+  installment_value: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
 }
 
 export default function Historico() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const [simulations, setSimulations] = useState<Simulation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchSimulations();
+  }, []);
+
+  const fetchSimulations = async () => {
+    try {
+      const response = await api.get('/api/v1/simulations');
+      // Sort by creation date (newest first)
+      const sorted = response.data.sort((a: Simulation, b: Simulation) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setSimulations(sorted);
+    } catch (error) {
+      console.error('Error fetching simulations:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchSimulations();
+  }, []);
 
   const handleBack = () => {
     router.push('/(tabs)/dashboard');
   };
 
-  // Mock data - replace with real data from API
-  const simulations: Simulation[] = [
-    {
-      id: '1',
-      type: 'Refinanciamento',
-      number: '#1234',
-      amount: 'R$ 15.000,00',
-      status: 'Em Análise',
-      date: '15 Out 2025',
-    },
-    {
-      id: '2',
-      type: 'Novo Empréstimo',
-      number: '#1233',
-      amount: 'R$ 8.500,00',
-      status: 'Aprovado',
-      date: '08 Out 2025',
-    },
-    {
-      id: '3',
-      type: 'Refinanciamento',
-      number: '#1232',
-      amount: 'R$ 12.000,00',
-      status: 'Rejeitado',
-      date: '01 Out 2025',
-    },
-  ];
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Aprovado':
-        return colors.success;
-      case 'Rejeitado':
-        return colors.error;
-      case 'Em Análise':
-        return colors.warning;
+      case 'approved':
+        return colors.success || '#22c55e';
+      case 'rejected':
+        return colors.error || '#ef4444';
+      case 'pending':
+        return colors.warning || '#f59e0b';
       default:
         return colors.textSecondary;
     }
@@ -67,16 +72,42 @@ export default function Historico() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Aprovado':
+      case 'approved':
         return 'checkmark-circle';
-      case 'Rejeitado':
+      case 'rejected':
         return 'close-circle';
-      case 'Em Análise':
+      case 'pending':
         return 'time';
       default:
         return 'information-circle';
     }
   };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'Aprovado';
+      case 'rejected':
+        return 'Rejeitado';
+      case 'pending':
+        return 'Em Análise';
+      default:
+        return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={[]}>
+        <Header title="Histórico" subtitle="Acompanhe suas simulações" showBackButton onBackPress={handleBack} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Carregando histórico...</Text>
+        </View>
+        <MobileNav />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={[]}>
@@ -87,9 +118,12 @@ export default function Historico() {
         onBackPress={handleBack} 
       />
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
+        }
       >
         {simulations.length === 0 ? (
           <View style={[styles.emptyState, { backgroundColor: colors.card }]}>
@@ -120,9 +154,11 @@ export default function Historico() {
                   <View style={styles.cardHeader}>
                     <View>
                       <Text style={[styles.cardType, { color: colors.text }]}>
-                        {simulation.type} {simulation.number}
+                        {simulation.simulation_type} #{simulation.id.substring(0, 8)}
                       </Text>
-                      <Text style={[styles.cardAmount, { color: colors.accent }]}>{simulation.amount}</Text>
+                      <Text style={[styles.cardAmount, { color: colors.accent }]}>
+                        R$ {simulation.requested_amount.toFixed(2).replace('.', ',')}
+                      </Text>
                     </View>
                     <View style={[styles.statusIcon, { borderColor: statusColor }]}>
                       <Ionicons
@@ -134,9 +170,11 @@ export default function Historico() {
                   </View>
                   <View style={styles.cardFooter}>
                     <Text style={[styles.cardStatus, { color: statusColor }]}>
-                      {simulation.status}
+                      {getStatusText(simulation.status)}
                     </Text>
-                    <Text style={[styles.cardDate, { color: colors.textSecondary }]}>{simulation.date}</Text>
+                    <Text style={[styles.cardDate, { color: colors.textSecondary }]}>
+                      {new Date(simulation.created_at).toLocaleDateString('pt-BR')}
+                    </Text>
                   </View>
                 </View>
                 <Pressable 
@@ -164,6 +202,15 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  loadingText: {
+    fontSize: 14,
   },
   card: {
     borderRadius: borderRadius.md,

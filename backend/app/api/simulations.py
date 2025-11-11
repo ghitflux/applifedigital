@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import BaseModel
 from app.core.database import get_db
 from app.api.auth import get_current_user
 from app.models import User, Simulation
 from app.schemas import SimulationCreate, SimulationResponse
+
+class StatusUpdate(BaseModel):
+    status: str
 
 router = APIRouter()
 
@@ -59,5 +63,31 @@ async def get_simulation(
 
     if not simulation:
         raise HTTPException(status_code=404, detail="Simulation not found")
+
+    return simulation
+
+@router.put("/{simulation_id}/status", response_model=SimulationResponse)
+async def update_simulation_status(
+    simulation_id: str,
+    status_data: StatusUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    simulation = db.query(Simulation).filter(
+        Simulation.id == simulation_id,
+        Simulation.user_id == current_user.id
+    ).first()
+
+    if not simulation:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+
+    # Validate status
+    valid_statuses = ['pending', 'approved', 'rejected']
+    if status_data.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+
+    simulation.status = status_data.status
+    db.commit()
+    db.refresh(simulation)
 
     return simulation
