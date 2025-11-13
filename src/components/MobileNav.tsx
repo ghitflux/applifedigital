@@ -14,6 +14,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Início', icon: 'home-outline', route: '/(tabs)/dashboard' },
   { name: 'Histórico', icon: 'time-outline', route: '/(tabs)/historico' },
+  { name: 'Simular', icon: 'calculator-outline', route: '/screens/enviar-documento' },
   { name: 'Notificações', icon: 'notifications-outline', route: '/(tabs)/notificacoes' },
   { name: 'Perfil', icon: 'person-outline', route: '/(tabs)/perfil' },
 ];

@@ -35,6 +35,7 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('[Auth] Attempting login...');
       // Call backend login endpoint
       const response = await api.post('/api/v1/auth/login', { email, password });
       const { access_token } = response.data;
@@ -46,23 +47,40 @@ export function useAuth() {
       const userResponse = await api.get('/api/v1/users/me');
       setUser(userResponse.data);
 
+      console.log('[Auth] Login successful');
       return { success: true };
     } catch (error: any) {
-      console.error('Login error:', error);
-      const message = error.response?.data?.detail || 'Erro ao fazer login';
+      console.error('[Auth] Login error:', error);
+      let message = 'Erro ao fazer login';
+
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        message = 'Erro de conexão. Verifique se o backend está rodando.';
+      } else if (error.response?.data?.detail) {
+        message = error.response.data.detail;
+      }
+
       return { success: false, error: message };
     }
   };
 
   const register = async (data: { name: string; email: string; password: string; cpf?: string; phone?: string }) => {
     try {
+      console.log('[Auth] Attempting registration...');
       // Call backend register endpoint
       await api.post('/api/v1/auth/register', data);
       // Backend doesn't auto-login, so user needs to login after registration
+      console.log('[Auth] Registration successful');
       return { success: true };
     } catch (error: any) {
-      console.error('Register error:', error);
-      const message = error.response?.data?.detail || 'Erro ao criar conta';
+      console.error('[Auth] Register error:', error);
+      let message = 'Erro ao criar conta';
+
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        message = 'Erro de conexão. Verifique se o backend está rodando.';
+      } else if (error.response?.data?.detail) {
+        message = error.response.data.detail;
+      }
+
       return { success: false, error: message };
     }
   };

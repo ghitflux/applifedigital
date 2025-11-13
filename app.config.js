@@ -36,7 +36,10 @@ module.exports = {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.API_URL || "http://localhost:8000",
+      // For physical devices, use your local network IP: 192.168.3.8
+      // For Android Emulator, use: 10.0.2.2
+      // For production, set API_URL environment variable
+      apiUrl: "http://192.168.3.8:8000",
     }
   }
 };

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
@@ -20,7 +20,7 @@ export default function Perfil() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Perfil" showBackButton onBackPress={handleBack} showAvatar={false} />
 
       <ScrollView 
@@ -50,7 +50,10 @@ export default function Perfil() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Conta</Text>
 
-          <Pressable style={[styles.menuItem, { backgroundColor: colors.card }]}>
+          <Pressable
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
+            onPress={() => router.push('/screens/dados-pessoais')}
+          >
             <Ionicons name="person-outline" size={24} color={colors.text} />
             <View style={styles.menuContent}>
               <Text style={[styles.menuText, { color: colors.text }]}>Dados Pessoais</Text>
@@ -59,7 +62,10 @@ export default function Perfil() {
             <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </Pressable>
 
-          <Pressable style={[styles.menuItem, { backgroundColor: colors.card }]}>
+          <Pressable
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
+            onPress={() => router.push('/screens/meus-documentos')}
+          >
             <Ionicons name="document-text-outline" size={24} color={colors.text} />
             <View style={styles.menuContent}>
               <Text style={[styles.menuText, { color: colors.text }]}>Meus Documentos</Text>
@@ -68,7 +74,10 @@ export default function Perfil() {
             <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </Pressable>
 
-          <Pressable style={[styles.menuItem, { backgroundColor: colors.card }]}>
+          <Pressable
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
+            onPress={() => router.push('/(tabs)/notificacoes')}
+          >
             <Ionicons name="notifications-outline" size={24} color={colors.text} />
             <View style={styles.menuContent}>
               <Text style={[styles.menuText, { color: colors.text }]}>Notificações</Text>

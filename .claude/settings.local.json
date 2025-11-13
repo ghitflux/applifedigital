@@ -17,7 +17,12 @@
       "Bash(del tamagui.config.ts)",
       "Bash(del tamagui-web.css 2)",
       "Bash(npx kill-port:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(ipconfig:*)",
+      "Bash(tasklist:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

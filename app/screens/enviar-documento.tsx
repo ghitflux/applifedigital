@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Header, MobileNav, Input } from '@/components';
 import { useDocumentPicker } from '@/hooks/useDocumentPicker';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -59,26 +59,28 @@ export default function EnviarDocumento() {
       // In a production app, you would upload to S3/Cloudinary first, then send URL
       const documentData = {
         document_type: documentType,
-        file_name: selectedFile.name || `document_${Date.now()}.jpg`,
+        file_name: selectedFile.name || selectedFile.fileName || `document_${Date.now()}.jpg`,
         file_url: selectedFile.uri || '', // In production, this would be the S3 URL
-        file_size: selectedFile.size || 0,
+        file_size: selectedFile.size || selectedFile.fileSize || 0,
       };
 
+      console.log('[Upload] Sending document:', documentData);
       await api.post('/api/v1/documents', documentData);
 
       Alert.alert('Sucesso', 'Documento enviado com sucesso!');
       setSelectedFile(null);
       setDocumentType('');
     } catch (error: any) {
-      console.error('Upload error:', error);
-      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao enviar documento');
+      console.error('[Upload] Error:', error);
+      const errorMessage = String(error.response?.data?.detail || error.message || 'Erro ao enviar documento');
+      Alert.alert('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Enviar Documento" showBackButton />
 
       <ScrollView 
@@ -180,9 +182,9 @@ export default function EnviarDocumento() {
           </View>
         </View>
       </ScrollView>
-      
+
       <MobileNav />
-    </SafeAreaView>
+    </View>
   );
 }
 
