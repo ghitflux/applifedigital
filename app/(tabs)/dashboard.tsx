@@ -30,9 +30,10 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       // Fetch all data in parallel
-      const [simulations, documents] = await Promise.all([
+      const [simulations, documents, margins] = await Promise.all([
         api.get('/api/v1/simulations'),
         api.get('/api/v1/documents'),
+        api.get('/api/v1/margins/current').catch(() => ({ data: null })),
       ]);
 
       // Get latest pending simulation
@@ -42,7 +43,7 @@ export default function Dashboard() {
       const approvedDocs = documents.data.filter((d: any) => d.status === 'approved');
 
       setDashboardData({
-        margin: null, // Will come from real margin API later
+        margin: margins.data,
         latestSimulation: latestPending,
         documentsCount: documents.data.length,
         approvedDocuments: approvedDocs.length,
@@ -61,7 +62,7 @@ export default function Dashboard() {
   }, []);
 
   const handleConsultarMargem = () => {
-    router.push('/screens/consultar-margem');
+    router.push('/screens/detalhes-margem');
   };
 
   const handleEnviarDocumento = () => {
@@ -105,14 +106,16 @@ export default function Dashboard() {
         <View style={[styles.marginCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.marginLabel, { color: colors.textSecondary }]}>Margem Disponível</Text>
           <View style={styles.marginValueContainer}>
-            <Text style={[styles.marginValue, { color: colors.accent }]}>R$ 5.240,00</Text>
+            <Text style={[styles.marginValue, { color: colors.accent }]}>
+              {dashboardData.margin ? `R$ ${parseFloat(dashboardData.margin.available_margin).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Carregando...'}
+            </Text>
             <View style={[styles.dollarIcon, { backgroundColor: colors.success + '20' }]}>
               <Ionicons name="logo-usd" size={24} color={colors.success} />
             </View>
           </View>
           <View style={styles.marginStatus}>
             <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-            <Text style={[styles.marginStatusText, { color: colors.textSecondary }]}>Atualizado há 2 horas</Text>
+            <Text style={[styles.marginStatusText, { color: colors.textSecondary }]}>Atualizado automaticamente</Text>
           </View>
           <Pressable style={[styles.detailsButton, { backgroundColor: colors.cardSecondary }]} onPress={handleConsultarMargem}>
             <Text style={[styles.detailsButtonText, { color: colors.accent }]}>Ver Detalhes</Text>

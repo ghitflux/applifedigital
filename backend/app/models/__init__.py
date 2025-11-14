@@ -110,7 +110,7 @@ class ActivityLog(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True)
     action = Column(String(100), nullable=False)
     description = Column(Text)
-    extra_data = Column(JSON)  # Renamed from 'metadata' (reserved by SQLAlchemy)
+    extra_metadata = Column("metadata", JSON)  # Map Python attribute to database column 'metadata'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="activity_log")
