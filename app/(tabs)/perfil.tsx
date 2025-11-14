@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
@@ -20,7 +20,7 @@ export default function Perfil() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header title="Perfil" showBackButton onBackPress={handleBack} showAvatar={false} />
 
       <ScrollView 
