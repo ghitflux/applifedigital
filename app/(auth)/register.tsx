@@ -1,14 +1,17 @@
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { AlertDialog } from '@/components';
+import { useAlert } from '@/hooks/useAlert';
 
 export default function Register() {
   const router = useRouter();
   const { colors } = useTheme();
   const { register } = useAuth();
+  const { alert, showError, showSuccess, dismissAlert } = useAlert();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,17 +21,17 @@ export default function Register() {
   const handleRegister = async () => {
     // Validations
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      showError('Erro', 'Por favor, preencha todos os campos');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem');
+      showError('Erro', 'As senhas não coincidem');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Erro', 'A senha deve ter no mínimo 6 caracteres');
+      showError('Erro', 'A senha deve ter no mínimo 6 caracteres');
       return;
     }
 
@@ -37,13 +40,13 @@ export default function Register() {
     setLoading(false);
 
     if (result.success) {
-      Alert.alert(
+      showSuccess(
         'Sucesso',
         'Conta criada com sucesso! Faça login para continuar.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+        () => router.replace('/(auth)/login')
       );
     } else {
-      Alert.alert('Erro', result.error || 'Erro ao criar conta');
+      showError('Erro', result.error || 'Erro ao criar conta');
     }
   };
 
@@ -105,6 +108,18 @@ export default function Register() {
           <Text style={[styles.link, { color: colors.accent }]}>Já tem conta? Entrar</Text>
         </Pressable>
       </View>
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
     </ScrollView>
   );
 }

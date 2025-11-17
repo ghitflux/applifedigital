@@ -70,13 +70,29 @@ def create_users(db: Session):
         return existing_users
 
     users = []
-    # Create 3 test users
-    for i in range(3):
+    # Create test user with simple password
+    test_password = "password123"[:72]  # Bcrypt max 72 bytes
+
+    # Create primary test user
+    user = User(
+        id=uuid.uuid4(),
+        email="user@example.com",
+        password_hash=pwd_context.hash(test_password),
+        name="Test User",
+        cpf="12345678900",
+        phone="(11) 999999999"
+    )
+    db.add(user)
+    users.append(user)
+    print(f"[✓] Created user: user@example.com")
+
+    # Create 2 more test users
+    for i in range(2):
         person = generate_fake_person()
         user = User(
             id=uuid.uuid4(),
             email=person["email"],
-            password_hash=pwd_context.hash("password123"),
+            password_hash=pwd_context.hash(test_password),
             name=person["name"],
             cpf=person["cpf"],
             phone=person["phone"]

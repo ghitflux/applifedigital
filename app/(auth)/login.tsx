@@ -1,22 +1,25 @@
-import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { AlertDialog } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
+import { useAlert } from '@/hooks/useAlert';
 
 export default function Login() {
   const router = useRouter();
   const { colors } = useTheme();
   const { login } = useAuth();
+  const { alert, showError, dismissAlert } = useAlert();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      showError('Erro', 'Por favor, preencha todos os campos');
       return;
     }
 
@@ -27,7 +30,7 @@ export default function Login() {
     if (result.success) {
       router.replace('/(tabs)/dashboard');
     } else {
-      Alert.alert('Erro', result.error || 'Erro ao fazer login');
+      showError('Erro', result.error || 'Erro ao fazer login');
     }
   };
 
@@ -91,6 +94,18 @@ export default function Login() {
           <Text style={[styles.link, { color: colors.accent }]}>Não tem conta? Criar conta</Text>
         </Pressable>
       </View>
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
     </View>
   );
 }

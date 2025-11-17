@@ -1,16 +1,18 @@
-import { View, Text, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Input, Button, Header, MobileNav } from '@/components';
+import { Input, Button, Header, MobileNav, AlertDialog } from '@/components';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { api } from '@/services/api';
+import { useAlert } from '@/hooks/useAlert';
 
 export default function NovaSimulacao() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { alert, showError, dismissAlert } = useAlert();
   const [amount, setAmount] = useState('');
   const [installments, setInstallments] = useState('');
   const [interestRate] = useState('2.5'); // Fixed rate for now
@@ -18,7 +20,7 @@ export default function NovaSimulacao() {
 
   const handleSimulate = async () => {
     if (!amount || !installments) {
-      Alert.alert('Erro', 'Preencha todos os campos');
+      showError('Erro', 'Preencha todos os campos');
       return;
     }
 
@@ -45,7 +47,7 @@ export default function NovaSimulacao() {
       });
     } catch (error: any) {
       console.error('Simulation error:', error);
-      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao criar simulação');
+      showError('Erro', error.response?.data?.detail || 'Erro ao criar simulação');
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,19 @@ export default function NovaSimulacao() {
           />
         </View>
       </ScrollView>
-      
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
+
       <MobileNav />
     </SafeAreaView>
   );

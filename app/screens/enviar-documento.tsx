@@ -1,17 +1,19 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Header, MobileNav, Input } from '@/components';
+import { Button, Header, MobileNav, Input, AlertDialog } from '@/components';
 import { useDocumentPicker } from '@/hooks/useDocumentPicker';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 import { api } from '@/services/api';
+import { useAlert } from '@/hooks/useAlert';
 
 export default function EnviarDocumento() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { alert, showError, showSuccess, dismissAlert } = useAlert();
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [documentType, setDocumentType] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export default function EnviarDocumento() {
   const handleTakePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos de acesso à câmera');
+      showError('Permissão negada', 'Precisamos de acesso à câmera');
       return;
     }
 
@@ -44,12 +46,12 @@ export default function EnviarDocumento() {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      Alert.alert('Erro', 'Selecione um documento primeiro');
+      showError('Erro', 'Selecione um documento primeiro');
       return;
     }
 
     if (!documentType) {
-      Alert.alert('Erro', 'Selecione o tipo de documento');
+      showError('Erro', 'Selecione o tipo de documento');
       return;
     }
 
@@ -67,13 +69,13 @@ export default function EnviarDocumento() {
       console.log('[Upload] Sending document:', documentData);
       await api.post('/api/v1/documents', documentData);
 
-      Alert.alert('Sucesso', 'Documento enviado com sucesso!');
+      showSuccess('Sucesso', 'Documento enviado com sucesso!');
       setSelectedFile(null);
       setDocumentType('');
     } catch (error: any) {
       console.error('[Upload] Error:', error);
       const errorMessage = String(error.response?.data?.detail || error.message || 'Erro ao enviar documento');
-      Alert.alert('Erro', errorMessage);
+      showError('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -182,6 +184,18 @@ export default function EnviarDocumento() {
           </View>
         </View>
       </ScrollView>
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
 
       <MobileNav />
     </View>

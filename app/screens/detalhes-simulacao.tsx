@@ -1,13 +1,14 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
-import { Header, MobileNav } from '@/components';
+import { Header, MobileNav, AlertDialog } from '@/components';
 import { formatCurrency } from '@/utils/formatters';
 import { api } from '@/services/api';
+import { useAlert } from '@/hooks/useAlert';
 
 interface Simulation {
   id: string;
@@ -26,6 +27,7 @@ export default function DetalhesSimulacao() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { alert, showError, showSuccess, showConfirm, showDestructive, dismissAlert } = useAlert();
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +41,7 @@ export default function DetalhesSimulacao() {
       setSimulation(response.data);
     } catch (error) {
       console.error('Error fetching simulation:', error);
-      Alert.alert('Erro', 'Não foi possível carregar a simulação');
+      showError('Erro', 'Não foi possível carregar a simulação');
       router.back();
     } finally {
       setLoading(false);
@@ -47,47 +49,32 @@ export default function DetalhesSimulacao() {
   };
 
   const handleReprovar = () => {
-    Alert.alert(
+    showDestructive(
       'Reprovar Simulação',
       'Tem certeza que deseja reprovar esta simulação?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reprovar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.put(`/api/v1/simulations/${params.id}/status`, { status: 'rejected' });
-              Alert.alert('Sucesso', 'Simulação reprovada com sucesso');
-              router.back();
-            } catch (error) {
-              Alert.alert('Erro', 'Não foi possível reprovar a simulação');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await api.put(`/api/v1/simulations/${params.id}/status`, { status: 'rejected' });
+          showSuccess('Sucesso', 'Simulação reprovada com sucesso', () => router.back());
+        } catch (error) {
+          showError('Erro', 'Não foi possível reprovar a simulação');
+        }
+      }
     );
   };
 
   const handleAprovar = () => {
-    Alert.alert(
+    showConfirm(
       'Aprovar e Enviar',
       'Tem certeza que deseja aprovar e enviar esta simulação?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Aprovar',
-          onPress: async () => {
-            try {
-              await api.put(`/api/v1/simulations/${params.id}/status`, { status: 'approved' });
-              Alert.alert('Sucesso', 'Simulação aprovada e enviada com sucesso');
-              router.back();
-            } catch (error) {
-              Alert.alert('Erro', 'Não foi possível aprovar a simulação');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await api.put(`/api/v1/simulations/${params.id}/status`, { status: 'approved' });
+          showSuccess('Sucesso', 'Simulação aprovada e enviada com sucesso', () => router.back());
+        } catch (error) {
+          showError('Erro', 'Não foi possível aprovar a simulação');
+        }
+      }
     );
   };
 
@@ -238,6 +225,18 @@ export default function DetalhesSimulacao() {
           </View>
         </View>
       </ScrollView>
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
 
       <MobileNav />
     </SafeAreaView>

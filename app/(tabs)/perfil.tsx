@@ -1,22 +1,62 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { typography, borderRadius, spacing } from '@/constants/theme';
 import { Header, MobileNav } from '@/components';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/services/api';
+import { useEffect, useState } from 'react';
 
 export default function Perfil() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { user, logout } = useAuth();
+  const [stats, setStats] = useState({ simulations: 0, margin: 'R$ 0,00' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, [user]);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const [simulationsRes, marginsRes] = await Promise.all([
+        api.get('/api/v1/simulations'),
+        api.get('/api/v1/margins/current'),
+      ]);
+
+      const simulations = simulationsRes.data?.length || 0;
+      const margin = marginsRes.data?.available_margin || 0;
+
+      // Format margin as currency
+      const formattedMargin = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(margin);
+
+      setStats({ simulations, margin: formattedMargin });
+    } catch (error) {
+      console.log('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     router.push('/(tabs)/dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     router.replace('/');
+  };
+
+  const getAvatarLetter = () => {
+    return user?.name?.charAt(0).toUpperCase() || 'U';
   };
 
   return (
@@ -29,20 +69,32 @@ export default function Perfil() {
       >
         <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
           <View style={[styles.avatar, { backgroundColor: colors.cardSecondary, borderColor: colors.accent }]}>
-            <Text style={[styles.avatarText, { color: colors.text }]}>J</Text>
+            <Text style={[styles.avatarText, { color: colors.text }]}>{getAvatarLetter()}</Text>
           </View>
-          <Text style={[styles.userName, { color: colors.text }]}>João Silva</Text>
-          <Text style={[styles.userEmail, { color: colors.textSecondary }]}>joao.silva@email.com</Text>
-          
+          <Text style={[styles.userName, { color: colors.text }]}>{user?.name || 'Usuário'}</Text>
+          <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{user?.email || ''}</Text>
+
           <View style={[styles.statsContainer, { borderTopColor: colors.border }]}>
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: colors.accent }]}>3</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Simulações</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <>
+                  <Text style={[styles.statValue, { color: colors.accent }]}>{stats.simulations}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Simulações</Text>
+                </>
+              )}
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: colors.accent }]}>R$ 5.240</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Margem</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <>
+                  <Text style={[styles.statValue, { color: colors.accent }]}>{stats.margin}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Margem</Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -117,7 +169,10 @@ export default function Perfil() {
 
         <Text style={[styles.version, { color: colors.textSecondary }]}>Versão 1.0.0</Text>
 
-        <Pressable style={[styles.logoutButton, { backgroundColor: colors.card, borderColor: colors.error }]} onPress={handleLogout}>
+        <Pressable
+          style={[styles.logoutButton, { backgroundColor: colors.card, borderColor: colors.error }]}
+          onPress={handleLogout}
+        >
           <Ionicons name="log-out-outline" size={24} color={colors.error} />
           <Text style={[styles.logoutText, { color: colors.error }]}>Sair da Conta</Text>
         </Pressable>

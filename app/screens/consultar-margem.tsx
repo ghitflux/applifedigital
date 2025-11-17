@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Alert, View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Button, Input, Loading, Card, Header, MobileNav } from '@/components';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { Button, Input, Loading, Card, Header, MobileNav, AlertDialog } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@/utils/formatters';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { api } from '@/services/api';
+import { useAlert } from '@/hooks/useAlert';
 
 interface MarginData {
   total_margin: number;
@@ -19,20 +20,21 @@ interface MarginData {
 export default function ConsultarMargem() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { alert, showError, dismissAlert } = useAlert();
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
   const [marginData, setMarginData] = useState<MarginData | null>(null);
 
   const handleConsult = async () => {
     if (!cpf) {
-      Alert.alert('Erro', 'Digite seu CPF');
+      showError('Erro', 'Digite seu CPF');
       return;
     }
 
     // Basic CPF format validation
     const cpfNumbers = cpf.replace(/\D/g, '');
     if (cpfNumbers.length !== 11) {
-      Alert.alert('Erro', 'CPF inválido. Digite 11 dígitos.');
+      showError('Erro', 'CPF inválido. Digite 11 dígitos.');
       return;
     }
 
@@ -42,7 +44,7 @@ export default function ConsultarMargem() {
       setMarginData(response.data);
     } catch (error: any) {
       console.error('Margin consultation error:', error);
-      Alert.alert('Erro', error.response?.data?.detail || 'Erro ao consultar margem');
+      showError('Erro', error.response?.data?.detail || 'Erro ao consultar margem');
       setLoading(false);
     } finally {
       setLoading(false);
@@ -137,7 +139,19 @@ export default function ConsultarMargem() {
           )}
         </ScrollView>
       </View>
-      
+
+      {alert && (
+        <AlertDialog
+          visible={!!alert}
+          title={alert.title}
+          message={alert.message}
+          buttons={alert.buttons}
+          icon={alert.icon as any}
+          iconColor={alert.iconColor}
+          onDismiss={dismissAlert}
+        />
+      )}
+
       <MobileNav />
     </SafeAreaView>
   );
