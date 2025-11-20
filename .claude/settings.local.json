@@ -38,7 +38,11 @@
       "Bash(docker-compose logs:*)",
       "Bash(python -m json.tool:*)",
       "Bash(python:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(timeout /t 2)",
+      "Bash(ls:*)",
+      "Bash(npx prisma:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

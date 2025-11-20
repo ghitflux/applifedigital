@@ -93,6 +93,7 @@ model Document {
   fileUrl      String    @map("file_url") @db.Text
   fileSize     Int?      @map("file_size")
   status       String    @default("pending") @db.VarChar(50)
+  createdAt    DateTime? @map("created_at") @db.Timestamp()
   uploadedAt   DateTime  @default(now()) @map("uploaded_at") @db.Timestamp()
 
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)

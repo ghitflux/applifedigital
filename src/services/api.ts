@@ -10,7 +10,30 @@ const getApiUrl = () => {
   console.log('[API] Constants.manifest?.extra:', Constants.manifest?.extra);
   console.log('[API] Constants.manifest2?.extra:', Constants.manifest2?.extra);
 
-  // Try expoConfig.extra first (Expo SDK 46+)
+  // For development, try to auto-detect the API URL from debugger host first
+  if (__DEV__) {
+    // Try to get the local network IP from Expo's debugger host (most reliable in development)
+    const debuggerHost = Constants.expoConfig?.hostUri?.split(':').shift()
+      || Constants.manifest?.debuggerHost?.split(':').shift()
+      || Constants.manifest2?.extra?.expoGo?.debuggerHost?.split(':').shift();
+
+    if (debuggerHost) {
+      console.log(`[API] Found debugger host: ${debuggerHost}`);
+      return `http://${debuggerHost}:8000`;
+    }
+
+    // Fallback for Android Emulator
+    if (Platform.OS === 'android') {
+      console.log('[API] Using Android Emulator default (10.0.2.2)');
+      return 'http://10.0.2.2:8000';
+    }
+
+    // Fallback for iOS simulator
+    console.log('[API] Using iOS Simulator default (localhost)');
+    return 'http://localhost:8000';
+  }
+
+  // Try expoConfig.extra first (Expo SDK 46+) - for explicit configuration
   if (Constants.expoConfig?.extra?.apiUrl) {
     console.log('[API] Using expoConfig.extra.apiUrl');
     return Constants.expoConfig.extra.apiUrl;
@@ -28,30 +51,8 @@ const getApiUrl = () => {
     return Constants.manifest2.extra.expoClient.extra.apiUrl;
   }
 
-  // Platform-specific defaults for development
-  if (__DEV__) {
-    console.log('[API] Using platform-specific default');
-
-    // Try to get the local network IP from Expo's debugger host
-    const debuggerHost = Constants.expoConfig?.hostUri?.split(':').shift()
-      || Constants.manifest?.debuggerHost?.split(':').shift();
-
-    if (debuggerHost) {
-      console.log(`[API] Found debugger host: ${debuggerHost}`);
-      return `http://${debuggerHost}:8000`;
-    }
-
-    // Fallback for Android - use local network IP
-    if (Platform.OS === 'android') {
-      // For physical device, use the local network IP
-      return 'http://192.168.3.8:8000';
-    }
-
-    // Fallback for iOS simulator
-    return 'http://localhost:8000';
-  }
-
   // Production fallback (should be set via environment variable)
+  console.log('[API] Using production fallback (localhost)');
   return 'http://localhost:8000';
 };
 

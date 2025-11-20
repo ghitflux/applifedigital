@@ -77,6 +77,7 @@ class DocumentResponse(BaseModel):
     file_name: str
     file_url: str
     status: str
+    created_at: Optional[datetime] = None
     uploaded_at: datetime
 
     class Config:

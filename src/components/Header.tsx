@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { spacing } from '@/constants/theme';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   title?: string;
@@ -22,6 +23,10 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const { colors } = useTheme();
+  const { user } = useAuth();
+
+  const userName = user?.name || 'Usuário';
+  const userInitial = userName.charAt(0).toUpperCase();
 
   const handleBack = () => {
     if (onBackPress) {
@@ -53,7 +58,7 @@ export default function Header({
           </View>
         ) : (
           <View style={styles.greetingContainer}>
-            <Text style={[styles.greeting, { color: colors.text }]}>Olá, João!</Text>
+            <Text style={[styles.greeting, { color: colors.text }]}>Olá, {userName}!</Text>
             <Text style={[styles.name, { color: colors.textSecondary }]}>Bem-vindo de volta</Text>
           </View>
         )}
@@ -61,7 +66,7 @@ export default function Header({
         {showAvatar ? (
           <Pressable onPress={handleProfile} style={styles.avatarButton}>
             <View style={[styles.avatar, { backgroundColor: colors.card }]}>
-              <Text style={[styles.avatarText, { color: colors.text }]}>J</Text>
+              <Text style={[styles.avatarText, { color: colors.text }]}>{userInitial}</Text>
             </View>
           </Pressable>
         ) : (

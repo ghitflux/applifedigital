@@ -35,8 +35,9 @@ export default function EnviarDocumento() {
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 0.8,
+      aspect: [4, 3],
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -64,6 +65,7 @@ export default function EnviarDocumento() {
         file_name: selectedFile.name || selectedFile.fileName || `document_${Date.now()}.jpg`,
         file_url: selectedFile.uri || '', // In production, this would be the S3 URL
         file_size: selectedFile.size || selectedFile.fileSize || 0,
+        created_at: new Date().toISOString(), // Add timestamp for document creation
       };
 
       console.log('[Upload] Sending document:', documentData);
@@ -110,7 +112,7 @@ export default function EnviarDocumento() {
 
         {selectedFile && (
           <View style={[styles.previewCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.previewTitle, { color: colors.text }]}>Arquivo Selecionado</Text>
+            <Text style={[styles.previewTitle, { color: colors.text }]}>Foto Capturada</Text>
             {selectedFile.uri && selectedFile.mimeType?.startsWith('image/') && (
               <Image source={{ uri: selectedFile.uri }} style={styles.previewImage} />
             )}
@@ -122,8 +124,15 @@ export default function EnviarDocumento() {
                   {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(2)} KB` : ''}
                 </Text>
               </View>
-              <Pressable onPress={() => setSelectedFile(null)}>
-                <Ionicons name="close-circle" size={24} color={colors.error} />
+            </View>
+
+            <View style={styles.photoActionButtons}>
+              <Pressable
+                style={[styles.retakeButton, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+                onPress={() => setSelectedFile(null)}
+              >
+                <Ionicons name="refresh-outline" size={20} color={colors.accent} />
+                <Text style={[styles.retakeButtonText, { color: colors.accent }]}>Tirar Outra Foto</Text>
               </Pressable>
             </View>
 
@@ -156,11 +165,31 @@ export default function EnviarDocumento() {
 
         {selectedFile && (
           <View style={styles.uploadContainer}>
-            <Button
-              title={loading ? 'Enviando...' : 'Enviar Documento'}
+            <Pressable
+              style={[
+                styles.sendPhotoButton,
+                {
+                  backgroundColor: colors.accent,
+                  opacity: documentType ? 1 : 0.6
+                }
+              ]}
               onPress={handleUpload}
-              disabled={loading}
-            />
+              disabled={!documentType || loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.text} />
+              ) : (
+                <>
+                  <Ionicons name="cloud-upload" size={24} color={colors.text} />
+                  <Text style={[styles.sendPhotoButtonText, { color: colors.text }]}>
+                    Enviar Foto
+                  </Text>
+                </>
+              )}
+            </Pressable>
+            <Text style={[styles.helperText, { color: colors.textSecondary }]}>
+              Selecione o tipo de documento para continuar
+            </Text>
           </View>
         )}
 
@@ -271,9 +300,49 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  photoActionButtons: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginVertical: spacing.md,
+  },
+  retakeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm,
+  },
+  retakeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   uploadContainer: {
     paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+  },
+  sendPhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    gap: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  sendPhotoButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  helperText: {
+    fontSize: 12,
+    textAlign: 'center',
   },
   documentsCard: {
     marginHorizontal: spacing.md,

@@ -36,10 +36,10 @@ module.exports = {
       typedRoutes: true
     },
     extra: {
-      // For physical devices, use your local network IP: 192.168.3.8
-      // For Android Emulator, use: 10.0.2.2
-      // For production, set API_URL environment variable
-      apiUrl: "http://192.168.3.8:8000",
+      // API URL will be auto-detected from Expo debugger host in development
+      // Set API_URL env var to override for production
+      // Default fallback for Android Emulator: 10.0.2.2
+      apiUrl: process.env.API_URL || "http://10.0.2.2:8000",
     }
   }
 };

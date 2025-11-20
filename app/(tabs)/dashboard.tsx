@@ -19,8 +19,7 @@ export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>({
     margin: null,
     latestSimulation: null,
-    documentsCount: 0,
-    approvedDocuments: 0,
+    recentActivity: [],
   });
 
   useEffect(() => {
@@ -31,22 +30,28 @@ export default function Dashboard() {
     try {
       // Fetch all data in parallel
       const [simulations, documents, margins] = await Promise.all([
-        api.get('/api/v1/simulations'),
-        api.get('/api/v1/documents'),
+        api.get('/api/v1/simulations').catch(() => ({ data: [] })),
+        api.get('/api/v1/documents').catch(() => ({ data: [] })),
         api.get('/api/v1/margins/current').catch(() => ({ data: null })),
       ]);
 
       // Get latest pending simulation
       const latestPending = simulations.data.find((s: any) => s.status === 'pending');
 
-      // Count approved documents
-      const approvedDocs = documents.data.filter((d: any) => d.status === 'approved');
+      // Combine and sort documents and simulations by date for recent activity
+      const allActivity = [
+        ...documents.data.map((d: any) => ({ ...d, type: 'document' })),
+        ...simulations.data.map((s: any) => ({ ...s, type: 'simulation' })),
+      ].sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at || a.createdAt || 0).getTime();
+        const dateB = new Date(b.created_at || b.createdAt || 0).getTime();
+        return dateB - dateA;
+      }).slice(0, 5); // Get last 5 activities
 
       setDashboardData({
         margin: margins.data,
         latestSimulation: latestPending,
-        documentsCount: documents.data.length,
-        approvedDocuments: approvedDocs.length,
+        recentActivity: allActivity,
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -91,7 +96,7 @@ export default function Dashboard() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <Header />
       <ScrollView
         style={styles.scrollView}
@@ -101,83 +106,93 @@ export default function Dashboard() {
         }
       >
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Sua Margem</Text>
-        <View style={[styles.marginCard, { backgroundColor: colors.card }]}>
-          <Text style={[styles.marginLabel, { color: colors.textSecondary }]}>Margem Disponível</Text>
-          <View style={styles.marginValueContainer}>
-            <Text style={[styles.marginValue, { color: colors.accent }]}>
-              {dashboardData.margin ? `R$ ${parseFloat(dashboardData.margin.available_margin).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Carregando...'}
-            </Text>
-            <View style={[styles.dollarIcon, { backgroundColor: colors.success + '20' }]}>
-              <Ionicons name="logo-usd" size={24} color={colors.success} />
+      <View style={[styles.prominentSection, { paddingHorizontal: spacing.md }]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.prominentCard,
+            { backgroundColor: '#22c55e', opacity: pressed ? 0.9 : 1 }
+          ]}
+          onPress={handleEnviarDocumento}
+        >
+          <View style={styles.prominentCardHeader}>
+            <View style={[styles.prominentIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
+              <Ionicons name="document-outline" size={44} color="#ffffff" />
             </View>
           </View>
-          <View style={styles.marginStatus}>
-            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-            <Text style={[styles.marginStatusText, { color: colors.textSecondary }]}>Atualizado automaticamente</Text>
+          <View style={styles.prominentCardBody}>
+            <Text style={[styles.prominentTitle, { color: '#ffffff' }]}>Consulte sua Margem</Text>
+            <Text style={[styles.prominentSubtitle, { color: 'rgba(255, 255, 255, 0.95)' }]}>Envie uma foto ou documento para análise</Text>
+            <View style={[styles.prominentButtonContainer, { backgroundColor: 'rgba(255, 255, 255, 0.2)', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.md, marginTop: spacing.md }]}>
+              <Text style={[styles.prominentButtonText, { color: '#ffffff' }]}>Iniciar Consulta</Text>
+              <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+            </View>
           </View>
-          <Pressable style={[styles.detailsButton, { backgroundColor: colors.cardSecondary }]} onPress={handleConsultarMargem}>
-            <Text style={[styles.detailsButtonText, { color: colors.accent }]}>Ver Detalhes</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.accent} />
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Ações Rápidas</Text>
-        <Pressable style={[styles.actionCardFull, { backgroundColor: colors.card }]} onPress={handleEnviarDocumento}>
-          <View style={[styles.actionIconContainer, { backgroundColor: colors.accent + '15' }]}>
-            <Ionicons name="cloud-upload-outline" size={28} color={colors.accent} />
-          </View>
-          <View style={styles.actionContent}>
-            <Text style={[styles.actionText, { color: colors.text }]}>Enviar Documento</Text>
-            <Text style={[styles.actionSubtext, { color: colors.textSecondary }]}>Envie seus documentos para análise</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
         </Pressable>
       </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Status Atual</Text>
-        
-        <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
-          <Ionicons
-            name={dashboardData.approvedDocuments === dashboardData.documentsCount ? "checkmark-circle" : "document-text"}
-            size={24}
-            color={dashboardData.approvedDocuments === dashboardData.documentsCount ? colors.success : colors.warning}
-          />
-          <View style={styles.statusContent}>
-            <Text style={[styles.statusTitle, { color: colors.text }]}>Documentos</Text>
-            <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>
-              {dashboardData.documentsCount === 0
-                ? 'Nenhum documento enviado'
-                : `${dashboardData.approvedDocuments}/${dashboardData.documentsCount} aprovados`}
-            </Text>
-          </View>
-          <Pressable onPress={() => router.push('/screens/meus-documentos')}>
-            <Text style={[styles.statusLink, { color: colors.accent }]}>Ver</Text>
-          </Pressable>
-        </View>
-
-        {dashboardData.latestSimulation && (
-          <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
-            <Ionicons name="time-outline" size={24} color={colors.warning} />
-            <View style={styles.statusContent}>
-              <Text style={[styles.statusTitle, { color: colors.text }]}>
-                Simulação #{dashboardData.latestSimulation.id.substring(0, 8)}
-              </Text>
-              <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>Em análise</Text>
-            </View>
-            <Pressable onPress={() => router.push({
+      {dashboardData.latestSimulation && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Retorno da Análise</Text>
+          <Pressable
+            style={({ pressed }) => [
+              styles.statusCard,
+              { backgroundColor: colors.card, opacity: pressed ? 0.7 : 1 }
+            ]}
+            onPress={() => router.push({
               pathname: '/screens/detalhes-simulacao',
               params: { id: dashboardData.latestSimulation.id }
-            })}>
+            })}
+          >
+            <View style={[styles.statusBadge, { backgroundColor: colors.warning }]}>
+              <Ionicons name="time-outline" size={20} color={colors.text} />
+            </View>
+            <View style={styles.statusContent}>
+              <Text style={[styles.statusTitle, { color: colors.text }]}>
+                Análise de Margem
+              </Text>
+              <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>
+                Resultado da análise do contracheque
+              </Text>
+            </View>
+            <View>
               <Text style={[styles.statusLink, { color: colors.accent }]}>Ver</Text>
+            </View>
+          </Pressable>
+        </View>
+      )}
+
+      {dashboardData.recentActivity.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Histórico Recente</Text>
+            <Pressable onPress={() => router.push('/(tabs)/historico')}>
+              <Text style={[styles.seeAllLink, { color: colors.accent }]}>Ver Tudo</Text>
             </Pressable>
           </View>
-        )}
-      </View>
+          {dashboardData.recentActivity.map((activity: any) => (
+            <View key={`${activity.type}-${activity.id}`} style={[styles.activityCard, { backgroundColor: colors.card }]}>
+              <View style={[styles.activityIcon, { backgroundColor: activity.type === 'document' ? colors.accent + '20' : colors.warning + '20' }]}>
+                <Ionicons
+                  name={activity.type === 'document' ? 'document' : 'time'}
+                  size={20}
+                  color={activity.type === 'document' ? colors.accent : colors.warning}
+                />
+              </View>
+              <View style={styles.activityContent}>
+                <Text style={[styles.activityTitle, { color: colors.text }]}>
+                  {activity.type === 'document' ? activity.document_type : `Simulação #${activity.id.substring(0, 8)}`}
+                </Text>
+                <Text style={[styles.activitySubtitle, { color: colors.textSecondary }]}>
+                  {activity.type === 'document' ? activity.file_name : `R$ ${activity.requested_amount?.toFixed(2).replace('.', ',')}`}
+                </Text>
+              </View>
+              <Text style={[styles.activityStatus, { color: activity.status === 'approved' ? colors.success : activity.status === 'rejected' ? colors.error : colors.warning }]}>
+                {activity.status === 'pending' ? 'Pendente' : activity.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
       </ScrollView>
       
       <MobileNav />
@@ -203,117 +218,142 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
     paddingBottom: spacing.lg,
   },
+  prominentSection: {
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: spacing.md,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: spacing.lg,
+    color: '#000',
   },
-  marginCard: {
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  marginLabel: {
-    fontSize: 14,
-    marginBottom: spacing.sm,
-  },
-  marginValueContainer: {
+  sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  marginValue: {
-    fontSize: 36,
-  },
-  dollarIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: spacing.lg,
   },
-  marginStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: spacing.md,
-  },
-  marginStatusText: {
-    fontSize: 12,
-  },
-  detailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    gap: 8,
-  },
-  detailsButtonText: {
+  seeAllLink: {
     fontSize: 14,
+    fontWeight: '600',
   },
-  actionCardFull: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    gap: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  actionIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionContent: {
-    flex: 1,
-  },
-  actionText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  actionSubtext: {
-    fontSize: 12,
-  },
-  statusCard: {
+  activityCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.sm,
     gap: spacing.md,
+  },
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  activitySubtitle: {
+    fontSize: 12,
+  },
+  activityStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  prominentCard: {
+    padding: spacing.xl,
+    borderRadius: borderRadius.xl,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+    gap: spacing.lg,
+  },
+  prominentCardHeader: {
+    alignItems: 'center',
+  },
+  prominentIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  prominentCardBody: {
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  prominentTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  prominentSubtitle: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  prominentButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  prominentButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
+    gap: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  statusBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
   statusContent: {
     flex: 1,
   },
   statusTitle: {
     fontSize: 16,
+    fontWeight: '600',
     marginBottom: 4,
   },
   statusSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
   },
   statusLink: {
     fontSize: 14,
+    fontWeight: '600',
   },
 });
 

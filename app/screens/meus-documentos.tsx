@@ -7,6 +7,7 @@ import { Header, MobileNav } from '@/components';
 import { useTheme } from '@/contexts/ThemeContext';
 import { borderRadius, spacing } from '@/constants/theme';
 import { api } from '@/services/api';
+import { formatDateSafe } from '@/utils/formatters';
 
 interface Document {
   id: string;
@@ -115,7 +116,7 @@ export default function MeusDocumentos() {
                   {getStatusText(doc.status)}
                 </Text>
                 <Text style={[styles.documentDate, { color: colors.textTertiary }]}>
-                  {new Date(doc.created_at).toLocaleDateString('pt-BR')}
+                  {formatDateSafe(doc.created_at)}
                 </Text>
               </View>
               <Ionicons name="checkmark-circle" size={20} color={getStatusColor(doc.status)} />

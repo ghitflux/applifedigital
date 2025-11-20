@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 import uuid
+from datetime import datetime
 from app.core.database import get_db
 from app.api.auth import get_current_user
 from app.models import User, Document
@@ -16,6 +17,7 @@ class DocumentMetadata(BaseModel):
     file_url: str
     file_size: int
     simulation_id: Optional[str] = None
+    created_at: Optional[str] = None
 
 @router.post("", response_model=DocumentResponse, status_code=201)
 async def create_document(
@@ -24,13 +26,24 @@ async def create_document(
     db: Session = Depends(get_db)
 ):
     """Create a document with metadata (for mobile app uploads to external storage)"""
+
+    # Parse created_at if provided, otherwise use None (uploaded_at will be auto-generated)
+    created_at = None
+    if document_data.created_at:
+        try:
+            created_at = datetime.fromisoformat(document_data.created_at.replace('Z', '+00:00'))
+        except (ValueError, AttributeError):
+            # If parsing fails, use None to let uploaded_at handle the timestamp
+            created_at = None
+
     new_document = Document(
         user_id=current_user.id,
         simulation_id=document_data.simulation_id if document_data.simulation_id else None,
         document_type=document_data.document_type,
         file_name=document_data.file_name,
         file_url=document_data.file_url,
-        file_size=document_data.file_size
+        file_size=document_data.file_size,
+        created_at=created_at
     )
 
     db.add(new_document)

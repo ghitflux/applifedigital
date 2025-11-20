@@ -6,6 +6,7 @@ import { borderRadius, spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertDialog } from '@/components';
 import { useAlert } from '@/hooks/useAlert';
+import { maskCPF, maskPhone } from '@/utils/formatters';
 
 export default function Register() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function Register() {
   const { alert, showError, showSuccess, dismissAlert } = useAlert();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [cpf, setCPF] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -72,6 +75,26 @@ export default function Register() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+        />
+
+        <TextInput
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
+          placeholder="CPF (000.000.000-00)"
+          placeholderTextColor={colors.placeholder}
+          value={cpf}
+          onChangeText={(text) => setCPF(maskCPF(text))}
+          keyboardType="numeric"
+          maxLength={14}
+        />
+
+        <TextInput
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
+          placeholder="WhatsApp (00) 99999-9999"
+          placeholderTextColor={colors.placeholder}
+          value={whatsapp}
+          onChangeText={(text) => setWhatsapp(maskPhone(text))}
+          keyboardType="phone-pad"
+          maxLength={15}
         />
 
         <TextInput

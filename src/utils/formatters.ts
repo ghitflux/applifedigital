@@ -38,3 +38,61 @@ export function formatDateTime(date: Date | string): string {
     minute: '2-digit',
   }).format(d);
 }
+
+// Mask functions for real-time input
+export function maskCPF(value: string): string {
+  return value
+    .replace(/\D/g, '')
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+export function maskPhone(value: string): string {
+  return value
+    .replace(/\D/g, '')
+    .slice(0, 11)
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+// Safe date formatting function that handles various date formats
+export function formatDateSafe(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) {
+    return 'Data não disponível';
+  }
+
+  try {
+    let date: Date;
+
+    if (typeof dateInput === 'string') {
+      // Try to parse the date string
+      // Handle various formats: ISO 8601, timestamp, etc.
+      date = new Date(dateInput);
+
+      // If invalid, try alternative parsing
+      if (isNaN(date.getTime())) {
+        // Try parsing as timestamp (milliseconds)
+        const timestamp = parseInt(dateInput, 10);
+        if (!isNaN(timestamp) && timestamp > 0) {
+          date = new Date(timestamp);
+        } else {
+          return 'Data inválida';
+        }
+      }
+    } else {
+      date = dateInput;
+    }
+
+    // Final validation
+    if (isNaN(date.getTime())) {
+      return 'Data inválida';
+    }
+
+    return date.toLocaleDateString('pt-BR');
+  } catch (error) {
+    console.error('[formatDateSafe] Error parsing date:', error);
+    return 'Data inválida';
+  }
+}
