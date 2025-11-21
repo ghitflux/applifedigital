@@ -1,0 +1,9 @@
+node_modules
+.expo
+.git
+.gitignore
+README.md
+npm-debug.log
+.DS_Store
+*.log
+.env.local
